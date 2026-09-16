@@ -25,6 +25,10 @@ what the agent needs to carry from either is your call.
   ~2400 lines and 19 files for a whole session and had to be reconstructed into
   three retroactive commits afterwards, losing the true chronology. Commit as
   each piece lands instead.
+- Push after every batch of completed work, not just at the end of a session.
+  A commit that only exists locally isn't evidence yet, and `PROCESS.md`'s
+  citations should always resolve on GitHub for a reader, not just in this
+  working copy.
 
 ## Never `toEqual` a large structure
 

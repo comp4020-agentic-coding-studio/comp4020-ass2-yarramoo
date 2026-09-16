@@ -30,6 +30,26 @@ what the agent needs to carry from either is your call.
   citations should always resolve on GitHub for a reader, not just in this
   working copy.
 
+## Research lives in `research/`, and it is cited
+
+The course this site describes is a technical one, so its pages rest on
+background research rather than invention. That research is in `research/`,
+one file per question, and `research/README.md` fixes the format: frontmatter
+with `area`/`question`/`keywords`, a `## Course design notes` section aimed at
+whoever writes the pages, and a `## Sources` section resolving bracketed
+citation keys.
+
+Two conventions to hold to when adding or using it:
+
+- **A missing citation beats a fabricated one.** Anything recalled rather than
+  sourced is prefixed `unverified:` in the text, so `grep -rn "unverified:"
+  research/` finds everything still owed a source. Never invent a source, a
+  page number, a quote, or a benchmark figure to fill a gap.
+- **Course pages inherit the research's claims.** Before a fact from
+  `research/` goes into `src/`, check it is not one of the `unverified:` ones.
+  A page that states something the corpus only guessed at is worse than a page
+  that stays vague.
+
 ## Never `toEqual` a large structure
 
 `expect(a).toEqual(b)` on large arrays/objects walks them element by element

@@ -11,8 +11,6 @@ an in-browser toy — so "done" is checkable against real output.
 
 ## How I got here
 
-
-
 `research/` had to exist before any lecture could cite it
 ([`776527f`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/776527f)).
 My first attempt dispatched the whole corpus as one unbounded
@@ -68,22 +66,13 @@ notes —
 ([`45a4d4b`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/45a4d4b))
 closed out the build.
 
-A later addition, `/ocaml-crash-course/`, exists because week 1's own "one
-variant type, one constructor per SNOBOL type" pitch is a big ask of anyone
-meeting `let rec`, pattern matching, and variants for the first time in
-week 1 itself. Not a general tutorial — every snippet is real, pulled with
+A late addition, `/ocaml-crash-course/`, exists because week 1 asks anyone
+new to OCaml to meet `let rec`, pattern matching and variants at the same
+time as SNOBOL4 itself. Not a general tutorial: every snippet is pulled with
 `git show <tag>:<path>` from this course's own solution tags rather than
-recalled from memory: week 1's `lexer.ml`, checkpoint 2's `value`/`goto`
-types, checkpoint 3's recursive `pattern` type, week 10's `-warn-error +8`.
-Its two manual citations name a verified section title rather than a
-chapter number, after fetching the manual's own contents page showed
-"Patterns" and "Type and exception definitions" as unnumbered subsections,
-not independently numbered chapters — a specific chapter number would have
-been invented, not sourced. Registered in `courseApiCollections` but,
-unlike `setup/`, deliberately given no `siteConfig.links` entry or
-home-page card: the brief asked for it "in the setup, or linked from the
-first lecture," which reads as a contextual pointer rather than a nav
-destination, and a fifth card would have broken the home page's existing
-2×2 grid. Linked inline instead, from `setup/`'s opening paragraph and from
-both of week 1's own pages (lecture and session) — the two places someone
-would actually be standing when they need it.
+recalled from memory. Its manual citations name verified section titles
+rather than chapter numbers — the manual's own contents page doesn't number
+those sections, so a number would have been invented, not sourced. Linked
+inline from `setup/` and both of week 1's pages rather than given a nav
+entry, which is where someone would actually be standing when they need it
+([`7099f2e`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/7099f2e)).

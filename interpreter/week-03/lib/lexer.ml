@@ -19,38 +19,8 @@ let is_alpha c = (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')
 let is_ident_char c = is_alpha c || is_digit c || c = '_'
 let is_blank c = c = ' ' || c = '\t'
 
-let tokenize (line : string) : token list =
-  let n = String.length line in
-  let rec go i acc =
-    if i >= n then List.rev (EOF :: acc)
-    else
-      let c = line.[i] in
-      if is_blank c then go (i + 1) acc
-      else if is_digit c then begin
-        let j = ref i in
-        while !j < n && is_digit line.[!j] do
-          incr j
-        done;
-        let text = String.sub line i (!j - i) in
-        go !j (INT (int_of_string text) :: acc)
-      end
-      else if is_alpha c then begin
-        let j = ref i in
-        while !j < n && is_ident_char line.[!j] do
-          incr j
-        done;
-        let text = String.sub line i (!j - i) in
-        go !j (IDENT text :: acc)
-      end
-      else
-        match c with
-        | '=' -> go (i + 1) (EQUALS :: acc)
-        | '+' -> go (i + 1) (PLUS :: acc)
-        | '-' -> go (i + 1) (MINUS :: acc)
-        | '*' -> go (i + 1) (STAR :: acc)
-        | '/' -> go (i + 1) (SLASH :: acc)
-        | '(' -> go (i + 1) (LPAREN :: acc)
-        | ')' -> go (i + 1) (RPAREN :: acc)
-        | _ -> raise (Lex_error (Printf.sprintf "unexpected character %c" c))
-  in
-  go 0 []
+(* TODO(week 3): extend week 2's arithmetic-only [tokenize] with
+   identifiers ([is_alpha] then zero or more [is_ident_char]) and '='.
+   Keep the digit-run and operator scanning from week 2 unchanged. *)
+let tokenize (_line : string) : token list =
+  failwith "TODO: extend the lexer with identifiers and '='"

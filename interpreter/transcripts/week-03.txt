@@ -1,0 +1,4 @@
+$ dune exec bin/main.exe -- examples/vars.sno
+11
+
+9

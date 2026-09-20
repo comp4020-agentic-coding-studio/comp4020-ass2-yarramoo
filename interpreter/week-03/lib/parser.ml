@@ -16,10 +16,11 @@ let expect st t =
   let got = advance st in
   if got <> t then raise (Parse_error "unexpected token")
 
+(* TODO(week 3): add an [IDENT name -> Var name] case alongside week 2's
+   [INT]/[LPAREN] cases. *)
 let rec parse_primary st =
   match advance st with
   | INT n -> Int n
-  | IDENT name -> Var name
   | LPAREN ->
     let e = parse_expr st in
     expect st RPAREN;
@@ -50,17 +51,11 @@ and parse_addsub st =
 
 and parse_expr st = parse_addsub st
 
-(* A week-3 statement is exactly [IDENT = expr]. *)
-let parse_stmt (toks : token list) : stmt =
-  let st = { toks } in
-  match advance st with
-  | IDENT name ->
-    expect st EQUALS;
-    let e = parse_expr st in
-    (match peek st with
-     | EOF -> Assign (name, e)
-     | _ -> raise (Parse_error "trailing tokens after assignment"))
-  | _ -> raise (Parse_error "expected an assignment statement (IDENT = expr)")
+(* TODO(week 3): a week-3 statement is exactly [IDENT = expr]. Advance
+   past the leading IDENT (the assignment's subject), [expect EQUALS],
+   parse the object expression, and confirm nothing trails it. *)
+let parse_stmt (_toks : token list) : stmt =
+  failwith "TODO: parse_stmt (IDENT = expr)"
 
 (* Split source text into logical lines, dropping blank lines and
    comment lines (a '*' in column 1), and parse each remaining line as

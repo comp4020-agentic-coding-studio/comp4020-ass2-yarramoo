@@ -17,33 +17,29 @@ let to_int = function
      | Some n -> n
      | None -> failwith (Printf.sprintf "not a number: %S" s))
 
-(* The global environment. Every checkpoint after this one reuses this
-   same table rather than redesigning it. *)
+(* TODO(week 3): the global environment. One mutable [Hashtbl], name to
+   value, built once and shared for the whole run -- resist the urge to
+   reach for anything scope-chain-shaped. *)
 let env : (string, value) Hashtbl.t = Hashtbl.create 64
 
-let lookup name =
-  match Hashtbl.find_opt env name with
-  | Some v -> v
-  | None -> VStr "" (* the null string is the default value of every
-                        unset variable *)
+(* TODO(week 3): [lookup] returns the stored value, or [VStr ""] (the
+   null string) if [name] has never been assigned. *)
+let lookup (_name : string) : value =
+  failwith "TODO: lookup"
 
-let assign name v =
-  Hashtbl.replace env name v;
-  if name = "OUTPUT" then print_endline (string_of_value v)
+(* TODO(week 3): [assign] stores [v] under [name], and -- since I/O in
+   this subset is entirely a side effect of assignment -- prints it if
+   [name] is "OUTPUT". *)
+let assign (_name : string) (_v : value) : unit =
+  failwith "TODO: assign"
 
-let rec eval_expr (e : expr) : value =
-  match e with
-  | Int n -> VInt n
-  | Var name -> lookup name
-  | Bin (op, l, r) ->
-    let a = to_int (eval_expr l) and b = to_int (eval_expr r) in
-    (match op with
-     | Add -> VInt (a + b)
-     | Sub -> VInt (a - b)
-     | Mul -> VInt (a * b)
-     | Div ->
-       if b = 0 then failwith "division by zero" else VInt (a / b))
+(* TODO(week 3): add a [Var name -> lookup name] case to week 2's
+   [eval_expr]. *)
+let eval_expr (_e : expr) : value =
+  failwith "TODO: eval_expr (add the Var case, keep Bin as week 2 had it)"
 
-let exec_stmt (Assign (name, e)) = assign name (eval_expr e)
+(* TODO(week 3): run one statement -- for now, just [Assign]. *)
+let exec_stmt (_s : stmt) : unit =
+  failwith "TODO: exec_stmt"
 
 let run (prog : program) = List.iter exec_stmt prog

@@ -1,0 +1,8 @@
+$ dune exec bin/main.exe -- examples/digits.sno
+INT 42
+EOF
+INT 7
+EOF
+INT 100
+INT 200
+EOF

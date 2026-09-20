@@ -22,12 +22,13 @@ let string_of_value = function
    is what a goto field reacts to. *)
 exception Fail_signal
 
-let to_int = function
-  | VInt n -> n
-  | VStr s ->
-    (match int_of_string_opt (String.trim s) with
-     | Some n -> n
-     | None -> raise Fail_signal)
+(* TODO(week 5): like checkpoint 1's [to_int], but a non-numeric string
+   is now a genuine statement failure ([raise Fail_signal]), not a hard
+   crash ([failwith]) -- this is the "at least one primitive that can
+   really fail" requirement, and division-by-zero below needs the same
+   treatment. *)
+let to_int (_v : value) : int =
+  failwith "TODO: to_int (raise Fail_signal on a non-numeric string)"
 
 let env : (string, value) Hashtbl.t = Hashtbl.create 64
 
@@ -40,61 +41,38 @@ let assign name v =
   Hashtbl.replace env name v;
   if name = "OUTPUT" then print_endline (string_of_value v)
 
-(* [LT(N1,N2)] etc: no boolean is ever produced. The predicate either
-   succeeds (yielding the null string, which nothing here inspects) or
-   fails -- it is the enclosing statement's goto field that actually
-   branches on that outcome. Scoped to numeric comparison only; real
-   SNOBOL4 also has string-identity IDENT/DIFFER and lexical-order LGT,
-   out of scope for this subset. *)
-let eval_compare (name : string) (args : value list) : value =
-  match args with
-  | [ a; b ] ->
-    let x = to_int a and y = to_int b in
-    let ok =
-      match name with
-      | "LT" -> x < y
-      | "LE" -> x <= y
-      | "EQ" -> x = y
-      | "NE" -> x <> y
-      | "GE" -> x >= y
-      | "GT" -> x > y
-      | _ -> false
-    in
-    if ok then VStr "" else raise Fail_signal
-  | _ -> failwith (Printf.sprintf "%s requires exactly two arguments" name)
+(* TODO(week 5): [LT(N1,N2)] etc -- no boolean is ever produced. Convert
+   both arguments with [to_int], compare according to [name] ("LT" ->
+   (<), "LE" -> (<=), "EQ" -> (=), "NE" -> (<>), "GE" -> (>=), "GT" ->
+   (>)), and either return [VStr ""] (success, the null string) or
+   [raise Fail_signal] (failure) -- never a boolean the caller inspects.
+   [args] should have exactly two elements; anything else is a genuine
+   interpreter-level [failwith], not a [Fail_signal]. *)
+let eval_compare (_name : string) (_args : value list) : value =
+  failwith "TODO: eval_compare"
 
-let is_comparison = function
-  | "LT" | "LE" | "EQ" | "NE" | "GE" | "GT" -> true
-  | _ -> false
+(* TODO(week 5): which names above are comparison predicates. *)
+let is_comparison (_name : string) : bool =
+  failwith "TODO: is_comparison"
 
-let rec eval_expr (e : expr) : value =
-  match e with
-  | Int n -> VInt n
-  | Str s -> VStr s
-  | Var name -> lookup name
-  | Neg e -> VInt (- (to_int (eval_expr e)))
-  | Bin (op, l, r) ->
-    let a = to_int (eval_expr l) and b = to_int (eval_expr r) in
-    (match op with
-     | Add -> VInt (a + b)
-     | Sub -> VInt (a - b)
-     | Mul -> VInt (a * b)
-     | Div -> if b = 0 then raise Fail_signal else VInt (a / b))
-  | Concat (l, r) ->
-    VStr (string_of_value (eval_expr l) ^ string_of_value (eval_expr r))
-  | Call (name, args) ->
-    let arg_vals = List.map eval_expr args in
-    if is_comparison name then eval_compare name arg_vals
-    else failwith (Printf.sprintf "call to undefined function: %s" name)
+(* TODO(week 5): checkpoint 1's [eval_expr] (Int/Str/Var/Neg/Bin/Concat)
+   plus one new case: [Call (name, args)] evaluates every argument, then
+   dispatches to [eval_compare] if [is_comparison name], or fails the
+   whole interpreter run (a genuine [failwith], not [Fail_signal] -- an
+   undefined function name is a program bug, not a runtime failure this
+   subset lets the goto field react to). Also route [Bin (Div, _, _)]
+   through [Fail_signal] on division by zero, same as [to_int] above. *)
+let eval_expr (_e : expr) : value =
+  failwith "TODO: eval_expr (add Call, and Fail_signal on division by zero)"
 
 type outcome = Success | Failure
 
-let exec_stmt (s : stmt) : outcome =
-  match s.body with
-  | Assign (name, e) ->
-    (try assign name (eval_expr e); Success with Fail_signal -> Failure)
-  | Expr e ->
-    (try ignore (eval_expr e); Success with Fail_signal -> Failure)
+(* TODO(week 5): run one statement and report [Success] or [Failure].
+   [Assign (name, e)]: evaluate [e] and [assign] it; catch [Fail_signal]
+   to report [Failure] instead of letting it escape. [Expr e]: evaluate
+   [e] only for its success/failure, same [Fail_signal] handling. *)
+let exec_stmt (_s : stmt) : outcome =
+  failwith "TODO: exec_stmt"
 
 (* The running program and its label table -- mutable and global because
    [run_from] jumps around inside it by index. One program per run. *)
@@ -107,37 +85,23 @@ let build_labels (prog : stmt array) : unit =
     (fun i s -> match s.label with Some l -> Hashtbl.replace labels l i | None -> ())
     prog
 
-let goto_target (lbl : string) : int =
-  match Hashtbl.find_opt labels lbl with
-  | Some i -> i
-  | None -> failwith (Printf.sprintf "undefined label: %s" lbl)
+(* TODO(week 5): resolve a goto-field label to a statement index via
+   [labels]; an unknown label is a genuine [failwith]. *)
+let goto_target (_lbl : string) : int =
+  failwith "TODO: goto_target"
 
-(* Run the program starting at statement [pc], following each
-   statement's goto field according to whether it succeeded or failed,
-   and falling off the end (or past an [END] label) if there's nowhere
-   left to go. *)
-let rec run_from (pc : int) : unit =
-  if pc < 0 || pc >= Array.length !program then ()
-  else begin
-    let s = (!program).(pc) in
-    if s.label = Some "END" then ()
-    else begin
-      let outcome = exec_stmt s in
-      let next_pc =
-        match s.goto with
-        | None -> pc + 1
-        | Some g ->
-          (match g.unconditional with
-           | Some lbl -> goto_target lbl
-           | None ->
-             (match outcome, g.on_success, g.on_failure with
-              | Success, Some lbl, _ -> goto_target lbl
-              | Failure, _, Some lbl -> goto_target lbl
-              | _ -> pc + 1))
-      in
-      run_from next_pc
-    end
-  end
+(* TODO(week 5): the program-counter dispatch loop. If [pc] is out of
+   bounds, stop. Otherwise run the statement at [pc] with [exec_stmt] to
+   get an [outcome], then decide the next pc from its goto field: no
+   goto field at all falls through to [pc + 1]; an [unconditional] goto
+   always jumps there; otherwise jump on [on_success] if the outcome was
+   [Success] and it's set, or on [on_failure] if the outcome was
+   [Failure] and it's set, and fall through to [pc + 1] if neither
+   applies. Recurse on the resulting pc. (A statement labeled "END" is a
+   convenient place to stop early, if you want one, but it isn't
+   required by anything in this week's spec.) *)
+let run_from (_pc : int) : unit =
+  failwith "TODO: run_from"
 
 let run (prog : program) : unit =
   program := prog;

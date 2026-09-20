@@ -32,34 +32,28 @@ let starts_operand = function
 (* Precedence chain, highest to lowest: primary (incl. function calls),
    unary minus, * /, + -, concatenation. Mutually recursive because a
    parenthesized expression and a call's argument list both bottom back
-   out through the whole chain. *)
+   out through the whole chain.
+
+   TODO(week 5): checkpoint 1's [parse_primary] handles [INT]/[STR]/
+   [LPAREN] already (kept below) and a bare [IDENT] as [Var] -- add the
+   new case: an [IDENT] immediately followed by '(' is a call, e.g.
+   [GT(N,10)]. Consume the '(', parse a comma-separated [parse_arglist],
+   then [expect st RPAREN]. *)
 let rec parse_primary (st : state) : expr =
   match advance st with
   | INT n -> Int n
   | STR s -> Str s
-  | IDENT name ->
-    if peek st = LPAREN then begin
-      ignore (advance st);
-      let args = parse_arglist st in
-      expect st RPAREN;
-      Call (name, args)
-    end else Var name
+  | IDENT _name -> failwith "TODO: parse_primary (add the IDENT '(' ... ')' call case)"
   | LPAREN ->
     let e = parse_concat st in
     expect st RPAREN;
     e
   | _ -> raise (Parse_error "expected an expression")
 
-and parse_arglist (st : state) : expr list =
-  if peek st = RPAREN then []
-  else
-    let rec loop acc =
-      let e = parse_concat st in
-      match peek st with
-      | COMMA -> ignore (advance st); loop (e :: acc)
-      | _ -> List.rev (e :: acc)
-    in
-    loop []
+(* TODO(week 5): zero or more comma-separated expressions, closed by
+   ')' (the ')' itself is left for the caller to [expect]). *)
+and parse_arglist (_st : state) : expr list =
+  failwith "TODO: parse_arglist"
 
 and parse_unary (st : state) : expr =
   match peek st with
@@ -105,55 +99,24 @@ let parse_label_name (st : state) : string =
   | IDENT name -> name
   | _ -> raise (Parse_error "expected a label name in goto field")
 
-let parse_goto (st : state) : goto option =
-  match peek st with
-  | COLON ->
-    ignore (advance st);
-    (match peek st with
-     | LPAREN ->
-       ignore (advance st);
-       let lbl = parse_label_name st in
-       expect st RPAREN;
-       Some { on_success = None; on_failure = None; unconditional = Some lbl }
-     | IDENT _ ->
-       let s_lbl = ref None and f_lbl = ref None in
-       let parse_one () =
-         match advance st with
-         | IDENT "S" ->
-           expect st LPAREN;
-           let l = parse_label_name st in
-           expect st RPAREN;
-           s_lbl := Some l
-         | IDENT "F" ->
-           expect st LPAREN;
-           let l = parse_label_name st in
-           expect st RPAREN;
-           f_lbl := Some l
-         | _ -> raise (Parse_error "expected S or F in goto field")
-       in
-       parse_one ();
-       (match peek st with
-        | IDENT ("S" | "F") -> parse_one ()
-        | _ -> ());
-       Some { on_success = !s_lbl; on_failure = !f_lbl; unconditional = None }
-     | _ -> raise (Parse_error "malformed goto field"))
-  | _ -> None
+(* TODO(week 5): if [peek st] isn't [COLON], there's no goto field --
+   return [None]. Otherwise consume the ':' and dispatch on what follows:
+   ['('] means unconditional (parse one [parse_label_name] between parens
+   and wrap it in [unconditional]); ['S'/'F' as an IDENT] means one or
+   both of [on_success]/[on_failure] -- each is its own "S(label)" or
+   "F(label)", and either can come first, so parse one, then check
+   whether the other follows immediately. *)
+let parse_goto (_st : state) : goto option =
+  failwith "TODO: parse_goto"
 
-(* A statement body is [subject] or [subject = object]. The subject is
-   parsed once as a full expression; if it turns out to be a bare
-   variable and an EQUALS follows, this is an assignment. Anything else
-   (a bare expression, typically a predicate call made for its
-   success/failure, e.g. `GT(N,10)`) is [Expr]. *)
-let parse_body (st : state) : stmt_body =
-  let subject = parse_expr st in
-  match peek st, subject with
-  | EQUALS, Var name ->
-    ignore (advance st);
-    let obj = parse_expr st in
-    Assign (name, obj)
-  | EQUALS, _ ->
-    raise (Parse_error "left-hand side of '=' must be a plain identifier")
-  | _ -> Expr subject
+(* TODO(week 5): a statement body is [subject] or [subject = object].
+   Parse the subject as one full expression ([parse_expr]); if it turns
+   out to be a bare [Var name] and an [EQUALS] follows, consume it and
+   parse an object expression for [Assign]. Otherwise the subject itself
+   is the whole statement ([Expr]) -- this is how a predicate call like
+   [GT(N,10)] is used on its own line, for its success/failure alone. *)
+let parse_body (_st : state) : stmt_body =
+  failwith "TODO: parse_body"
 
 let parse_stmt (label : string option) (toks : token list) : stmt =
   let st = { toks } in
@@ -164,22 +127,17 @@ let parse_stmt (label : string option) (toks : token list) : stmt =
    | _ -> raise (Parse_error "unexpected trailing tokens on statement"));
   { label; body; goto }
 
-(* A label starts in column 1; a label-less statement line must start
-   with a blank (research/snobol/02-language-reference.md, "Program
-   Format"). Splits the raw line into an optional label and the rest of
-   the line *before* tokenizing -- the label itself is never a token.
-   Comment lines ('*' in column 1) and blank lines are filtered out by
+(* TODO(week 5): a label starts in column 1; a label-less statement line
+   must start with a blank (research/snobol/02-language-reference.md,
+   "Program Format"). Split the raw line into an optional label and the
+   rest of the line *before* tokenizing -- the label itself is never a
+   token. If [line] is empty or starts with a blank there's no label:
+   return [(None, line)]. Otherwise scan [Lexer.is_ident_char]s from
+   column 0 to find where the label ends, and split there. Comment
+   lines ('*' in column 1) and blank lines are filtered out by
    [parse_program] before this ever runs. *)
-let split_label (line : string) : string option * string =
-  if line = "" then (None, line)
-  else if Lexer.is_blank line.[0] then (None, line)
-  else begin
-    let n = String.length line in
-    let i = ref 0 in
-    while !i < n && Lexer.is_ident_char line.[!i] do incr i done;
-    if !i = 0 then (None, line)
-    else (Some (String.sub line 0 !i), String.sub line !i (n - !i))
-  end
+let split_label (_line : string) : string option * string =
+  failwith "TODO: split_label"
 
 let parse_program (source : string) : program =
   let lines = String.split_on_char '\n' source in

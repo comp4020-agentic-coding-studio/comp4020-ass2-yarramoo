@@ -4,10 +4,12 @@
 
 **Implementing SNOBOL4** (`SLOP6753`): a 12-week compiler-construction studio
 built around a single 1962 language and the backtracking pattern-matching
-engine that made it strange. Four checkpoints hand students a real,
-partially-complete OCaml codebase (this week's feature stubbed as
-`failwith "TODO"`, plus a genuine transcript of the finished behaviour), not
-an in-browser toy — so "done" is checkable against real output.
+engine that made it strange. Weeks 1–11 each hand students a real,
+partially-complete OCaml project — that week's feature stubbed as
+`failwith "TODO"`, plus a genuine transcript of the finished behaviour —
+eleven in all, each extending the previous week's solution rather than
+restarting ([`b165a6c...419c9f0`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/compare/b165a6c...419c9f0)). Not an
+in-browser toy, so "done" is checkable against real output.
 
 ## How I got here
 
@@ -41,7 +43,7 @@ salvage mode I cut it — for budget reasons on top of relevance ones.
 
 Curriculum went in per movement, each its own commit so a bad batch was caught
 before the next built on it
-([`d82f1c4...4adfb9f`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/compare/d82f1c4...4adfb9f)), every factual claim
+([`d82f1c4...4adfb9f`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/compare/d82f1c4...4adfb9f)); every factual claim
 traced to a cited, non-`unverified:` source. What none of that catches is a
 page whose claim is simply untrue of the code beside it: it renders perfectly
 and passes every check I had. Two got through — seven promised pattern

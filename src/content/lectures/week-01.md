@@ -115,12 +115,16 @@ This is not a novel pairing. Andrew Appel's *Modern Compiler Implementation
 in ML* structures an entire course this way — build a complete compiler in
 an ML-family language, using its pattern matching and datatypes throughout —
 and this course borrows that structure wholesale, swapping Appel's toy source
-language for a real, historically significant one. The toolchain follows the
-same convention rather than inventing one: `ocamllex` for lexing (in the
-style of `lex`, and able to define multiple lexer entry points in one file —
-relevant later, once whitespace-sensitivity enters the picture) and a parser
-built by hand or with a generator such as `menhir`, whichever a given week's
-grammar actually calls for.
+language for a real, historically significant one. The toolchain departs
+from Appel's own in one place: rather than a generator like `ocamllex` (in
+the style of `lex`), this course's lexer is hand-rolled throughout, because
+SNOBOL4's arithmetic operators are blank-sensitive — the same character can
+be a binary operator, a unary operator, or a concatenation boundary,
+decided by what's adjacent to it — which is far more direct to express as
+an explicit character-by-character scan than as a generated automaton's
+regex-driven rules. The parser, by contrast, is built by hand or with a
+generator such as `menhir`, whichever a given week's grammar actually calls
+for.
 
 ## Further reading
 

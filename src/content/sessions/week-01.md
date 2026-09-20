@@ -1,15 +1,14 @@
 ---
 title: Getting started
 description:
-  Toolchain setup, and a skeleton ocamllex lexer that recognises integer
+  Toolchain setup, and a skeleton hand-rolled lexer that recognises integer
   literals — the smallest thing the course can call a running compiler
 week: 1
 date: 2027-02-22
 teachers:
   - marisol-quaye
 spec:
-  - your OCaml toolchain (an opam switch, dune, and a working ocamllex) builds
-    and runs
+  - your OCaml toolchain (an opam switch and dune) builds and runs
   - your lexer turns a string of digits into an integer-literal token
   - you can name, in one sentence, why SNOBOL4 needed a portable
     implementation strategy
@@ -19,12 +18,10 @@ related:
 
 ## Before the session
 
-Arrive with an OCaml toolchain installed: an opam switch, `dune` for
-building, and `ocamllex` available (it ships with the compiler distribution,
-so a working switch already has it). If you have never set one up before,
-budget real time for this — a broken toolchain on day one costs you every
-week after it, and it is much cheaper to fix before the course needs it for
-anything.
+Arrive with an OCaml toolchain installed: an opam switch and `dune` for
+building. If you have never set one up before, budget real time for this —
+a broken toolchain on day one costs you every week after it, and it is much
+cheaper to fix before the course needs it for anything.
 
 Skim the lecture's naming-dispute aside again before you arrive. You will be
 asked, briefly, which account you'd trust and why.
@@ -35,11 +32,20 @@ asked, briefly, which account you'd trust and why.
   project end to end. If it doesn't, this is what we fix first — everything
   else in the semester assumes it works.
 - **Skeleton lexer (main work).** Starting from a bare `dune` project, write
-  an `ocamllex` `.mll` file with one rule: match one or more digits and
-  produce an integer-literal token. This is deliberately the smallest
-  possible lexer — no whitespace handling, no operators, no strings yet. The
-  point is to see the whole pipeline (`.mll` → generated lexer → a token you
-  can print) working before it has to do anything interesting.
+  a small hand-rolled lexer — a function that scans a string character by
+  character with an index and produces one rule: match one or more digits
+  and produce an integer-literal token. Hand-rolled rather than
+  `ocamllex`-generated from the very first week, on purpose: SNOBOL4's
+  arithmetic operators are blank-sensitive (the same character can be a
+  binary operator, a unary operator, or a concatenation boundary, depending
+  on what's adjacent to it — you'll meet this properly in week 2), which
+  needs an explicit character-by-character scan tracking "was the previous
+  character a blank" rather than a generated automaton's regex-driven
+  rules. Starting hand-rolled avoids swapping lexer technology out from
+  under a working pipeline partway through Movement I. This is deliberately
+  the smallest possible lexer — no whitespace handling, no operators, no
+  strings yet. The point is to see the whole pipeline (source string → a
+  token you can print) working before it has to do anything interesting.
 - **Wrap-up.** Everyone should leave with a lexer that can turn `"42"` into a
   token and print it back out. That is week 1's entire deliverable, and it is
   intentionally small: the shape of the pipeline matters more this week than

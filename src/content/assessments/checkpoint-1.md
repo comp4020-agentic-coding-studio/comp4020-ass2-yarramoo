@@ -29,7 +29,7 @@ related:
 > four things Movement I's sessions built up over weeks 1–4.
 
 You are not starting from a blank page, and you are not being handed a
-finished solution. You get real starter code: a working `ocamllex` lexer,
+finished solution. You get real starter code: a working hand-rolled lexer,
 and a parser and evaluator with the Movement I gaps marked as
 `failwith "TODO"`. Your job is to fill in exactly those gaps, using the same
 representation choices the starter already commits to — a `value` variant

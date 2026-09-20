@@ -1,0 +1,81 @@
+Week 8 sample transcript
+=========================
+Captured by running week-08-solution's bin/main.exe against every example
+in interpreter/week-08/examples/. Real, unedited program output.
+
+$ dune exec bin/main.exe -- examples/basics.sno
+LEN OK
+ANY CORRECTLY FAILED
+NOTANY OK
+SPAN OK
+BREAK OK
+BREAK NULL-MATCH OK
+
+$ dune exec bin/main.exe -- examples/arb_growth.sno --trace
+matching against "MOUNTAIN"
+  trying match at position 0
+    "O" fails at 0
+  trying match at position 1
+    "O" matches at 1
+    at 2: trying first alternative, recording second on the history list
+    "" matches at 2
+    "A" fails at 2
+    backtrack: resuming recorded alternative at 2
+    LEN(1) matches at 2
+    at 3: trying first alternative, recording second on the history list
+    "" matches at 3
+    "A" fails at 3
+    backtrack: resuming recorded alternative at 3
+    LEN(1) matches at 3
+    at 4: trying first alternative, recording second on the history list
+    "" matches at 4
+    "A" fails at 4
+    backtrack: resuming recorded alternative at 4
+    LEN(1) matches at 4
+    at 5: trying first alternative, recording second on the history list
+    "" matches at 5
+    "A" matches at 5
+    matched, cursor now at 6
+ARB FOUND THE GAP
+
+$ dune exec bin/main.exe -- examples/arbno.sno --trace
+matching against "ABABABC"
+  trying match at position 0
+    at 0: trying first alternative, recording second on the history list
+    "" matches at 0
+    "C" fails at 0
+    backtrack: resuming recorded alternative at 0
+    ANY("AB") matches 'A' at 0
+    at 1: trying first alternative, recording second on the history list
+    "" matches at 1
+    "C" fails at 1
+    backtrack: resuming recorded alternative at 1
+    ANY("AB") matches 'B' at 1
+    at 2: trying first alternative, recording second on the history list
+    "" matches at 2
+    "C" fails at 2
+    backtrack: resuming recorded alternative at 2
+    ANY("AB") matches 'A' at 2
+    at 3: trying first alternative, recording second on the history list
+    "" matches at 3
+    "C" fails at 3
+    backtrack: resuming recorded alternative at 3
+    ANY("AB") matches 'B' at 3
+    at 4: trying first alternative, recording second on the history list
+    "" matches at 4
+    "C" fails at 4
+    backtrack: resuming recorded alternative at 4
+    ANY("AB") matches 'A' at 4
+    at 5: trying first alternative, recording second on the history list
+    "" matches at 5
+    "C" fails at 5
+    backtrack: resuming recorded alternative at 5
+    ANY("AB") matches 'B' at 5
+    at 6: trying first alternative, recording second on the history list
+    "" matches at 6
+    "C" matches at 6
+    matched, cursor now at 7
+ARBNO CONSUMED THE RUN
+
+$ dune exec bin/main.exe -- examples/bal.sno
+BAL MATCHED

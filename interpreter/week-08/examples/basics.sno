@@ -1,0 +1,23 @@
+* Week 8: the four non-retrying primitives, plus LEN, exercised against
+* a subject that makes their differences visible (research/snobol/
+* 03-pattern-matching.md, "The primitive patterns"). BREAK's null-match
+* case is the one this session flags explicitly: run with --trace to see
+* it succeed having consumed nothing, right where the digits begin.
+        SUBJECT = 'HELLO123'
+        SUBJECT LEN(5)                 :F(FAIL1)
+        OUTPUT = 'LEN OK'
+FAIL1   SUBJECT ANY('XYZ')             :F(ANYOK)
+        OUTPUT = 'ANY SHOULD HAVE FAILED'      :(SKIP1)
+ANYOK   OUTPUT = 'ANY CORRECTLY FAILED'
+SKIP1   SUBJECT NOTANY('XYZ')          :F(FAIL2)
+        OUTPUT = 'NOTANY OK'
+FAIL2   SUBJECT SPAN('HELO')           :F(FAIL3)
+        OUTPUT = 'SPAN OK'
+FAIL3   DIGITS = '123ABC'
+        DIGITS BREAK('ABC')            :F(FAIL4)
+        OUTPUT = 'BREAK OK'
+FAIL4   ALREADYDIGIT = 'ABC'
+        ALREADYDIGIT BREAK('ABC')      :F(NULLFAIL)
+        OUTPUT = 'BREAK NULL-MATCH OK'         :(STOP)
+NULLFAIL        OUTPUT = 'BREAK NULL-MATCH SHOULD HAVE SUCCEEDED'
+STOP    N = N

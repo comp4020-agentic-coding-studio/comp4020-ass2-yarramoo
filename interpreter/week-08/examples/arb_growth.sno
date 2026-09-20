@@ -1,0 +1,13 @@
+* Week 8: ARB starts at the null match and extends by exactly one
+* character each time the rest of the pattern fails to follow it
+* (research/snobol/03-pattern-matching.md, `ARB = NULL | LEN(1) *ARB`).
+* Against "MOUNTAIN", `"O" ARB "A"` must skip exactly "UNT" -- the
+* shortest run of characters between the "O" and the next "A" -- not
+* jump straight to the first "A" it could plausibly stop before, and
+* not stop short of it either. Run with --trace to watch ARB retry at
+* length 0, 1, 2, 3 in turn before "A" finally follows.
+        SUBJECT = 'MOUNTAIN'
+        SUBJECT 'O' ARB 'A'    :F(NOMATCH)
+        OUTPUT = 'ARB FOUND THE GAP'   :(STOP)
+NOMATCH OUTPUT = 'NO MATCH'
+STOP    SUBJECT = SUBJECT

@@ -1,0 +1,11 @@
+* Week 8: BAL is built entirely from NOTANY and ARBNO -- no hand-written
+* paren-depth counter (research/snobol/03-pattern-matching.md, worked
+* example 2: "(A(B)C)DE)" unanchored, BAL matches "(A(B)C)"). BAL is the
+* shortest *nonnull* balanced string, so it stops at the first fully
+* balanced prefix rather than continuing on into "DE)", which would
+* leave an unmatched trailing paren.
+        SUBJECT = '(A(B)C)DE)'
+        SUBJECT BAL             :F(NOMATCH)
+        OUTPUT = 'BAL MATCHED'         :(STOP)
+NOMATCH OUTPUT = 'NO MATCH'
+STOP    SUBJECT = SUBJECT

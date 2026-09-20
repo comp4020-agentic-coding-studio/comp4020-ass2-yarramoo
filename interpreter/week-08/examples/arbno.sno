@@ -1,0 +1,13 @@
+* Week 8: ARBNO(p) is ARB's growth-by-retry generalized to a whole
+* subpattern -- `ARBNO(p) = NULL | p *ARBNO(p)` (research/snobol/
+* 03-pattern-matching.md). ARBNO(ANY('AB')) against "ABABABC" tries
+* zero repetitions first, then grows the run by one A/B character at a
+* time on each backtrack. Because 'C' never occurs inside the leading
+* run itself, every attempt shorter than all six A/B characters is
+* doomed to fail the trailing 'C', so the search must grow all the way
+* through the run -- shortest-first, not greedy -- before it succeeds.
+        SUBJECT = 'ABABABC'
+        SUBJECT ARBNO(ANY('AB')) 'C'   :F(NOMATCH)
+        OUTPUT = 'ARBNO CONSUMED THE RUN'      :(STOP)
+NOMATCH OUTPUT = 'NO MATCH'
+STOP    SUBJECT = SUBJECT

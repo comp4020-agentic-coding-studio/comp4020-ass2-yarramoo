@@ -1,0 +1,12 @@
+* Demonstrates the blank-sensitivity "gotcha" from
+* research/snobol/02-language-reference.md: the same character, '-', is
+* either a binary operator or a concatenation boundary + unary operator,
+* decided purely by adjacent whitespace.
+
+A = 5
+B = 3
+SUBTRACTED = A - B
+OUTPUT = SUBTRACTED
+
+CONCATENATED = A -B
+OUTPUT = CONCATENATED

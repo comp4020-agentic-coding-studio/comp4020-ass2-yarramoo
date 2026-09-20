@@ -1,0 +1,6 @@
+X = 2 + 3 * 4
+OUTPUT = X
+Y = (2 + 3) * 4
+OUTPUT = Y
+Z = 7 / 2
+OUTPUT = Z

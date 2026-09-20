@@ -1,0 +1,11 @@
+$ dune exec bin/main.exe -- examples/hello.sno
+HELLO, SNOBOL4!
+
+$ dune exec bin/main.exe -- examples/arith.sno
+14
+20
+3
+
+$ dune exec bin/main.exe -- examples/blanks.sno
+2
+5-3

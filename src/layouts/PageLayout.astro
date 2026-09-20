@@ -6,3 +6,41 @@ import { siteConfig } from "../site-config";
 <MdxPageLayout siteConfig={siteConfig} {...Astro.props}>
   <slot />
 </MdxPageLayout>
+
+<style is:global>
+  /* Site-wide styling: a line-printer/technical-memo register on top of the
+     theme's derived colour tokens (see astro-theme-slop/slop.css) --- the
+     brand palette already reads as "old technical report"; these rules push
+     the typography and rules/tables the same direction without forking any
+     theme component. */
+
+  :root {
+    /* Sharp corners read as typewritten/printed; the theme default's soft
+       radius reads as software UI. */
+    --at-border-radius: 0.0625rem;
+  }
+
+  table {
+    border-collapse: collapse;
+  }
+
+  th,
+  td {
+    font-variant-numeric: tabular-nums;
+  }
+
+  thead th {
+    border-bottom: 2px solid var(--at-text);
+  }
+
+  tbody tr td,
+  tbody tr th {
+    border-top: 1px solid var(--at-border);
+  }
+
+  hr {
+    border: none;
+    border-top: 1px dashed var(--at-border);
+    margin-block: 2rem;
+  }
+</style>

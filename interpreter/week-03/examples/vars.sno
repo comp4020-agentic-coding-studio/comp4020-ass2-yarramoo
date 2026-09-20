@@ -1,0 +1,7 @@
+X = 5
+Y = X * 2 + 1
+OUTPUT = Y
+Z = UNSET
+OUTPUT = Z
+W = 9
+OUTPUT = W

@@ -40,23 +40,25 @@ export const slopCourseMetaSchema = z
 
 // The single source of truth for the course record. The generated homepage,
 // navigation label and /api/index.json all read this object.
-// Replace every placeholder value, but keep the shape: the catalogue ingests
-// this API contract when the course is published.
 //
 // The code's last three digits were assigned to this repo when it was
-// provisioned, and no other course in the cohort has them. Change the first
-// digit to your course's level (and `level` to match); keep the other three.
-// STARTER_CONTENT: replace this course record, then remove this comment.
+// provisioned, and no other course in the cohort has them; kept as-is. The
+// level digit is 6 (ANU's postgraduate coursework band) because the brief —
+// build a real front end and a real backtracking pattern-matcher, in a
+// language chosen specifically for its fit to that problem — assumes
+// comfort with recursive data types and no hand-holding on the toolchain.
 export const courseMeta = slopCourseMetaSchema.parse({
-  code: "SLOP1753",
-  title: "Course Title Goes Here",
+  code: "SLOP6753",
+  title: "Implementing SNOBOL4",
   session: "Semester 1",
   year: 2027,
-  level: 1,
+  level: 6,
   startDate: "2027-02-22",
   endDate: "2027-05-28",
   description:
-    "One concise paragraph explaining what this course is, who it is for, " +
-    "and why somebody would choose to spend a semester taking it.",
-  tags: ["replace me"],
+    "A twelve-week compiler-construction studio built around a single 1962 " +
+    "language, SNOBOL4, and the backtracking pattern-matching engine that " +
+    "made it strange. You write the whole thing yourself, in OCaml, one " +
+    "incremental submission at a time.",
+  tags: ["compilers", "SNOBOL4", "OCaml"],
 }) satisfies CourseMetaInput;

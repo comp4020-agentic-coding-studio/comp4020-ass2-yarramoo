@@ -25,3 +25,6 @@ $ dune exec bin/main.exe -- examples/regression.sno
 4
 6
 
+$ dune exec bin/main.exe -- examples/arbno_bal.sno
+ARBNO CAPTURED INTPART=3
+BAL CAPTURED GROUP=(A(B)C)

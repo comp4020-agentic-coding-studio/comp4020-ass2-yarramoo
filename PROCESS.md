@@ -8,8 +8,9 @@ engine that made it strange. Weeks 1–11 each hand students a real,
 partially-complete OCaml project — that week's feature stubbed as
 `failwith "TODO"`, plus a genuine transcript of the finished behaviour —
 eleven in all, each extending the previous week's solution rather than
-restarting ([`b165a6c...419c9f0`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/compare/b165a6c...419c9f0)). Not an
-in-browser toy, so "done" is checkable against real output.
+restarting ([`b165a6c...419c9f0`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/compare/b165a6c...419c9f0)). Not an in-browser toy, so "done" is checkable against real output.
+The best way to learn is by doing and playing, so downloadable projects
+per-week were made a priority in designing the course.
 
 ## How I got here
 
@@ -34,12 +35,13 @@ cutoff and was salvaged whole ([`f254329`](https://github.com/comp4020-agentic-c
 slower ([`f4ac719`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/f4ac719), [`9932af4`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/9932af4), [`a2ad958`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/a2ad958)), each graded against the
 corpus's own `confidence:` field ([`776527f`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/776527f)) —
 `research/snobol/01-history-and-lineage.md` still carries `mixed` where every
-other file carries `high`, which is that triage left visible. Not all of it came back, and the corpus shows where: `research/regex/` begins at
-`02-`, and `research/snobol/03-pattern-matching.md` still points readers to a
-`regex/03-snobol-patterns-vs-regex.md` that does not exist. One of the regex
-researchers had flagged early that SNOBOL4's approach genuinely wasn't regex,
-and asked whether the curriculum wanted an explicit comparison of the two; in
-salvage mode I cut it — for budget reasons on top of relevance ones.
+other file carries `high`, which is that triage left visible.
+
+The scope of research was reviewed and I decided to not recover the regex research.
+Near the beginning of the Opus research, a subagent raised that SNOBOL's string
+manipulation was considerably different from regex. With the new budget constraints,
+the comparison between SNOBOL and regex was dropped from the curriculum, which is why the
+final `/research/regex` is incomplete.
 
 Curriculum went in per movement, each its own commit so a bad batch was caught
 before the next built on it

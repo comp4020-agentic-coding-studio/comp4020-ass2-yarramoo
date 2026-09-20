@@ -127,15 +127,12 @@ let is_pattern_primitive name =
   | "LEN" | "ANY" | "NOTANY" | "SPAN" | "BREAK" | "ARBNO" -> true
   | _ -> false
 
-let eval_pattern_primitive (name : string) (args : value list) : value =
-  match name, args with
-  | "LEN", [ n ] -> VPattern (PLen (to_int n))
-  | "ANY", [ s ] -> VPattern (PAny (string_of_value s))
-  | "NOTANY", [ s ] -> VPattern (PNotAny (string_of_value s))
-  | "SPAN", [ s ] -> VPattern (PSpan (string_of_value s))
-  | "BREAK", [ s ] -> VPattern (PBreak (string_of_value s))
-  | "ARBNO", [ p ] -> VPattern (PArbno (to_pattern p))
-  | _ -> failwith (Printf.sprintf "%s requires exactly one argument" name)
+(* TODO(week 8): construct the [pattern] value for each primitive name.
+   [LEN]/[ANY]/[NOTANY]/[SPAN]/[BREAK] each take one string/int argument
+   and wrap it in the matching [pattern] constructor; [ARBNO] takes one
+   pattern argument (coerce with [to_pattern]) and wraps it in [PArbno]. *)
+let eval_pattern_primitive (_name : string) (_args : value list) : value =
+  failwith "TODO: week 8 -- build the pattern value for this primitive"
 
 (* `BAL`, built exactly as the lecture derives it -- see the module
    comment for why OCaml accepts a directly self-referential [pattern]
@@ -192,59 +189,39 @@ let match_from (pat : pattern) (subj : string) (start : int) : int option =
         trace (Printf.sprintf "    %S fails at %d" s pos);
         backtrack ()
       end
-    | PLen n :: rest ->
-      if n >= 0 && pos + n <= len then begin
-        trace (Printf.sprintf "    LEN(%d) matches at %d" n pos);
-        step rest (pos + n)
-      end else begin
-        trace (Printf.sprintf "    LEN(%d) fails at %d" n pos);
-        backtrack ()
-      end
-    | PAny set :: rest ->
-      if pos < len && str_contains set subj.[pos] then begin
-        trace (Printf.sprintf "    ANY(%S) matches %C at %d" set subj.[pos] pos);
-        step rest (pos + 1)
-      end else begin
-        trace (Printf.sprintf "    ANY(%S) fails at %d" set pos);
-        backtrack ()
-      end
-    | PNotAny set :: rest ->
-      if pos < len && not (str_contains set subj.[pos]) then begin
-        trace (Printf.sprintf "    NOTANY(%S) matches %C at %d" set subj.[pos] pos);
-        step rest (pos + 1)
-      end else begin
-        trace (Printf.sprintf "    NOTANY(%S) fails at %d" set pos);
-        backtrack ()
-      end
-    | PSpan set :: rest ->
-      (* Longest run (>=1 char) from [set]. One attempt, at the
-         maximal length -- SPAN does not retry shorter on backtrack
-         "in the usual case" (research file), so neither does this. *)
-      let j = ref pos in
-      while !j < len && str_contains set subj.[!j] do incr j done;
-      if !j > pos then begin
-        trace (Printf.sprintf "    SPAN(%S) matches [%d,%d)" set pos !j);
-        step rest !j
-      end else begin
-        trace (Printf.sprintf "    SPAN(%S) fails at %d (no characters from the set)" set pos);
-        backtrack ()
-      end
-    | PBreak set :: rest ->
-      (* Longest run NOT in [set]; may be null if the very next
-         character is already in [set]. Deterministic length, so also
-         a single attempt -- but unlike SPAN, this one always
-         succeeds. *)
-      let j = ref pos in
-      while !j < len && not (str_contains set subj.[!j]) do incr j done;
-      trace (Printf.sprintf "    BREAK(%S) matches [%d,%d)" set pos !j);
-      step rest !j
-    | PArb :: rest ->
-      (* Green Book: `ARB = NULL | LEN(1) *ARB` -- rewrite into the
-         [PAlt] case below, which does the actual recording/resuming. *)
-      step (PAlt (PLit "", PConcat (PLen 1, PArb)) :: rest) pos
-    | PArbno p :: rest ->
-      (* Same trick, generalized: `ARBNO(p) = NULL | p *ARBNO(p)`. *)
-      step (PAlt (PLit "", PConcat (p, PArbno p)) :: rest) pos
+    | PLen _n :: _rest ->
+      (* TODO(week 8): succeed iff [n] non-negative chars remain from
+         [pos]; on success, advance [pos] by [n] and call [step rest].
+         On failure, call [backtrack ()] -- same shape as [PLit] above. *)
+      failwith "TODO: week 8 -- match LEN(n)"
+    | PAny _set :: _rest ->
+      (* TODO(week 8): succeed iff the char at [pos] is in [set];
+         advance by exactly 1 on success, else [backtrack ()]. *)
+      failwith "TODO: week 8 -- match ANY(set)"
+    | PNotAny _set :: _rest ->
+      (* TODO(week 8): same shape as ANY, but succeed when the char at
+         [pos] is NOT in [set]. *)
+      failwith "TODO: week 8 -- match NOTANY(set)"
+    | PSpan _set :: _rest ->
+      (* TODO(week 8): consume the longest run (>=1 char) of chars from
+         [set] starting at [pos], in one attempt -- SPAN does not retry
+         a shorter run on backtrack. Fail if that run would be empty. *)
+      failwith "TODO: week 8 -- match SPAN(set)"
+    | PBreak _set :: _rest ->
+      (* TODO(week 8): consume the longest run of chars NOT in [set]
+         starting at [pos]. This one always succeeds, even with a null
+         (zero-length) match -- do not call [backtrack ()] here. *)
+      failwith "TODO: week 8 -- match BREAK(set)"
+    | PArb :: _rest ->
+      (* TODO(week 8): rewrite into the Green Book's own definition,
+         `ARB = NULL | LEN(1) *ARB`, and re-enter [step] on that
+         rewritten form -- do not write new retry logic here, reuse
+         [PAlt]/[PConcat] the way [PArbno] below will. *)
+      failwith "TODO: week 8 -- rewrite ARB via its recursive definition"
+    | PArbno _p :: _rest ->
+      (* TODO(week 8): same trick, generalized: `ARBNO(p) = NULL |
+         p *ARBNO(p)`. *)
+      failwith "TODO: week 8 -- rewrite ARBNO(p) via its recursive definition"
     | PConcat (p1, p2) :: rest -> step (p1 :: p2 :: rest) pos
     | PAlt (p1, p2) :: rest ->
       stack := { alt = p2; rest; at = pos } :: !stack;

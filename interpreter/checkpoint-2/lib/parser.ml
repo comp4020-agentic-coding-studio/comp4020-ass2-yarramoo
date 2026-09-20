@@ -96,91 +96,49 @@ and parse_concat (st : state) : expr =
 
 let parse_expr st = parse_concat st
 
-(* Goto field: ":" then either "(label)" (unconditional) or one or two of
-   "S(label)"/"F(label)" in either order (research/snobol/
-   02-language-reference.md, "Goto field": ":S(label)", ":F(label)",
-   ":S(l1)F(l2)", ":F(l1)S(l2)", ":(label)"). *)
 let parse_label_name (st : state) : string =
   match advance st with
   | IDENT name -> name
   | _ -> raise (Parse_error "expected a label name in goto field")
 
-let parse_goto (st : state) : goto option =
-  match peek st with
-  | COLON ->
-    ignore (advance st);
-    (match peek st with
-     | LPAREN ->
-       ignore (advance st);
-       let lbl = parse_label_name st in
-       expect st RPAREN;
-       Some { on_success = None; on_failure = None; unconditional = Some lbl }
-     | IDENT _ ->
-       let s_lbl = ref None and f_lbl = ref None in
-       let parse_one () =
-         match advance st with
-         | IDENT "S" ->
-           expect st LPAREN;
-           let l = parse_label_name st in
-           expect st RPAREN;
-           s_lbl := Some l
-         | IDENT "F" ->
-           expect st LPAREN;
-           let l = parse_label_name st in
-           expect st RPAREN;
-           f_lbl := Some l
-         | _ -> raise (Parse_error "expected S or F in goto field")
-       in
-       parse_one ();
-       (match peek st with
-        | IDENT ("S" | "F") -> parse_one ()
-        | _ -> ());
-       Some { on_success = !s_lbl; on_failure = !f_lbl; unconditional = None }
-     | _ -> raise (Parse_error "malformed goto field"))
-  | _ -> None
+(* TODO(checkpoint 2): implement the new statement-shape and label rules.
 
-(* A statement body is [subject] or [subject = object]. The subject is
-   parsed once as a full expression; if it turns out to be a bare
-   variable and an EQUALS follows, this is an assignment. Anything else
-   (a bare expression, typically a function call made for effect, e.g.
-   `DEFINE(...)`) is [Expr]. *)
-let parse_body (st : state) : stmt_body =
-  let subject = parse_expr st in
-  match peek st, subject with
-  | EQUALS, Var name ->
-    ignore (advance st);
-    let obj = parse_expr st in
-    Assign (name, obj)
-  | EQUALS, _ ->
-    raise (Parse_error "left-hand side of '=' must be a plain identifier")
-  | _ -> Expr subject
+   [parse_goto]: a goto field is ":" then either "(label)"
+   (unconditional -- [unconditional]) or one or two of "S(label)"/
+   "F(label)" in either order ([on_success]/[on_failure]). See
+   research/snobol/02-language-reference.md, "Goto field", for the exact
+   forms (":S(label)", ":F(label)", ":S(l1)F(l2)", ":F(l1)S(l2)",
+   ":(label)"). No leading ":" at all means no goto field -- return
+   [None]. [parse_label_name] above reads one label name once you're
+   positioned at it.
 
-let parse_stmt (label : string option) (toks : token list) : stmt =
-  let st = { toks } in
-  let body = parse_body st in
-  let goto = parse_goto st in
-  (match peek st with
-   | EOF -> ()
-   | _ -> raise (Parse_error "unexpected trailing tokens on statement"));
-  { label; body; goto }
+   [parse_body]: a statement body is [subject] or [subject = object].
+   Parse [subject] once with [parse_expr]; if it's a bare [Var name] and
+   an [EQUALS] follows, consume it and parse [object] to build [Assign].
+   Otherwise (a bare expression -- typically a function call made for
+   effect, e.g. a top-level `DEFINE(...)`) build [Expr].
 
-(* A label starts in column 1: the very first character of the line is
-   not a blank, and (per this subset) is the start of an identifier. A
-   label-less statement line must start with a blank
-   (research/snobol/02-language-reference.md, "Program Format": labels
-   occupy column 1, everything else is indented). Comment lines ('*' in
-   column 1) and blank lines are filtered out by [parse_program] before
-   this ever runs. *)
-let split_label (line : string) : string option * string =
-  if line = "" then (None, line)
-  else if Lexer.is_blank line.[0] then (None, line)
-  else begin
-    let n = String.length line in
-    let i = ref 0 in
-    while !i < n && Lexer.is_ident_char line.[!i] do incr i done;
-    if !i = 0 then (None, line)
-    else (Some (String.sub line 0 !i), String.sub line !i (n - !i))
-  end
+   [parse_stmt]: parse a body, then an optional goto field, then require
+   nothing but [EOF] left.
+
+   [split_label]: a label starts in column 1 -- the line's very first
+   character is not a blank, and (in this subset) starts an identifier.
+   A label-less statement line must start with a blank
+   (research/snobol/02-language-reference.md, "Program Format"). Return
+   [(label option, rest-of-line-with-the-label-removed)]. Comment lines
+   ('*' in column 1) and blank lines never reach this function --
+   [parse_program] filters them out first. *)
+let parse_goto (_st : state) : goto option =
+  failwith "TODO: implement parse_goto (':' then '(label)' or S(...)/F(...))"
+
+let parse_body (_st : state) : stmt_body =
+  failwith "TODO: implement parse_body (subject, or subject = object)"
+
+let parse_stmt (_label : string option) (_toks : token list) : stmt =
+  failwith "TODO: implement parse_stmt (parse_body, then parse_goto, then expect EOF)"
+
+let split_label (_line : string) : string option * string =
+  failwith "TODO: implement split_label (column-1 label rule -- see the comment above)"
 
 let parse_program (source : string) : program =
   let lines = String.split_on_char '\n' source in

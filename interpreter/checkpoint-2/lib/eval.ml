@@ -122,6 +122,42 @@ let build_labels (prog : stmt array) : unit =
     (fun i s -> match s.label with Some l -> Hashtbl.replace labels l i | None -> ())
     prog
 
+(* TODO(checkpoint 2): implement the control-flow engine.
+
+   [eval_expr]'s Int/Str/Var/Neg/Bin/Concat cases are unchanged from
+   checkpoint 1 and are given below, working. Its [Call] case is also
+   given: it already dispatches to [eval_define], [eval_compare], or
+   [call_function] as appropriate -- what's missing is the bodies of
+   [eval_define], [call_function], [exec_stmt], [goto_target], and
+   [run_from] themselves, which is where checkpoint 2's actual new ideas
+   live:
+
+   - [eval_define]: parse a DEFINE prototype string like
+     "NAME(ARG1,ARG2)LOCAL1,LOCAL2" (an optional second DEFINE argument
+     overrides the entry label) and register it in [defs].
+   - [call_function]: save the current values of the function-name
+     variable, the formals, and the locals; bind the formals to the
+     call's argument values and the locals to the null string; run the
+     function body from its entry label with [run_from]; then restore
+     the saved values. Read the function-name variable's value *before*
+     restoring it -- that's the call's result. [run_from] finishing
+     normally (falling off the end without RETURN/FRETURN) should count
+     as a failure.
+   - [exec_stmt]: evaluate an [Assign] or [Expr] statement body, and
+     turn a caught [Fail_signal] into [Failure] rather than letting it
+     escape (a statement failing is data, not an exceptional OCaml
+     error).
+   - [goto_target]: resolve a goto-field label name to a statement
+     index via [labels] -- except "RETURN" and "FRETURN", which are not
+     ordinary labels; raise [Stmt_return] / [Stmt_freturn] for those
+     instead (see the module comment for why).
+   - [run_from]: run the statement at [pc], then use its [goto] field
+     and the outcome of executing it to decide the next [pc] --
+     ":(label)" always wins if present; otherwise ":S(label)" on
+     [Success] or ":F(label)" on [Failure]; otherwise fall through to
+     [pc + 1]. A statement labelled "END" halts *before* it runs (so
+     that a program can have function bodies physically below its main
+     line of statements without falling into them). *)
 let rec eval_expr (e : expr) : value =
   match e with
   | Int n -> VInt n
@@ -148,129 +184,20 @@ let rec eval_expr (e : expr) : value =
       | Some d -> call_function name d arg_vals
       | None -> failwith (Printf.sprintf "call to undefined function: %s" name)
 
-(* DEFINE('NAME(ARG1,ARG2)LOCAL1,LOCAL2' [, 'ENTRYLABEL']). The prototype
-   string's own grammar (a name, then a parenthesized comma-separated
-   formal list, then a comma-separated local list with no parens) is
-   parsed here with plain string splitting -- it is a tiny, fixed shape,
-   not worth a sub-lexer. *)
-and eval_define (args : value list) : value =
-  let proto =
-    match args with
-    | v :: _ -> string_of_value v
-    | [] -> failwith "DEFINE requires at least one argument"
-  in
-  let entry_arg =
-    match args with
-    | [ _; e ] -> Some (string_of_value e)
-    | _ -> None
-  in
-  let split_csv s =
-    String.split_on_char ',' s
-    |> List.map String.trim
-    |> List.filter (fun s -> s <> "")
-  in
-  let open_paren =
-    match String.index_opt proto '(' with
-    | Some i -> i
-    | None -> failwith (Printf.sprintf "DEFINE: malformed prototype %S (missing '(')" proto)
-  in
-  let close_paren =
-    match String.index_opt proto ')' with
-    | Some i -> i
-    | None -> failwith (Printf.sprintf "DEFINE: malformed prototype %S (missing ')')" proto)
-  in
-  let name = String.sub proto 0 open_paren in
-  let formals_str = String.sub proto (open_paren + 1) (close_paren - open_paren - 1) in
-  let locals_str =
-    String.sub proto (close_paren + 1) (String.length proto - close_paren - 1)
-  in
-  let formals = split_csv formals_str in
-  let locals = split_csv locals_str in
-  let entry = match entry_arg with Some e -> e | None -> name in
-  Hashtbl.replace defs name { formals; locals; entry };
-  VStr ""
+and eval_define (_args : value list) : value =
+  failwith "TODO: implement eval_define (parse the prototype string, register it in defs)"
 
-and call_function (fn_name : string) (d : def) (args : value list) : value =
-  let tracked = fn_name :: (d.formals @ d.locals) in
-  let saved = List.map (fun v -> (v, lookup v)) tracked in
-  let restore () = List.iter (fun (v, old) -> Hashtbl.replace env v old) saved in
-  let rec bind formals actuals =
-    match formals, actuals with
-    | [], _ -> ()
-    | f :: fs, a :: rest -> Hashtbl.replace env f a; bind fs rest
-    | f :: fs, [] -> Hashtbl.replace env f (VStr ""); bind fs []
-  in
-  bind d.formals args;
-  List.iter (fun l -> Hashtbl.replace env l (VStr "")) d.locals;
-  let entry_pc =
-    match Hashtbl.find_opt labels d.entry with
-    | Some i -> i
-    | None -> failwith (Printf.sprintf "DEFINE: unknown entry label %s" d.entry)
-  in
-  (try
-     run_from entry_pc;
-     (* Fell off the end of the program without RETURN/FRETURN: SNOBOL4
-        treats this as a failure to return properly. Restoring the saved
-        state and signalling failure is the conservative choice. *)
-     restore ();
-     raise Fail_signal
-   with
-   | Stmt_return ->
-     let result = lookup fn_name in
-     restore ();
-     result
-   | Stmt_freturn ->
-     restore ();
-     raise Fail_signal)
+and call_function (_fn_name : string) (_d : def) (_args : value list) : value =
+  failwith "TODO: implement call_function (save/bind/run/restore -- see the comment above)"
 
-and exec_stmt (s : stmt) : outcome =
-  match s.body with
-  | Assign (name, e) ->
-    (try
-       let v = eval_expr e in
-       assign name v;
-       Success
-     with Fail_signal -> Failure)
-  | Expr e ->
-    (try
-       ignore (eval_expr e);
-       Success
-     with Fail_signal -> Failure)
+and exec_stmt (_s : stmt) : outcome =
+  failwith "TODO: implement exec_stmt (evaluate the body, turn Fail_signal into Failure)"
 
-(* Resolve a goto-field label to a statement index, treating RETURN and
-   FRETURN as control exceptions rather than ordinary labels -- see the
-   module comment. Using either as a label at the top level, outside any
-   call, is a program bug reported by [run]. *)
-and goto_target (lbl : string) : int =
-  if lbl = "RETURN" then raise Stmt_return
-  else if lbl = "FRETURN" then raise Stmt_freturn
-  else
-    match Hashtbl.find_opt labels lbl with
-    | Some i -> i
-    | None -> failwith (Printf.sprintf "undefined label: %s" lbl)
+and goto_target (_lbl : string) : int =
+  failwith "TODO: implement goto_target (RETURN/FRETURN raise; otherwise look up in labels)"
 
-and run_from (pc : int) : unit =
-  if pc < 0 || pc >= Array.length !program then ()
-  else begin
-    let s = (!program).(pc) in
-    if s.label = Some "END" then ()
-    else begin
-      let outcome = exec_stmt s in
-      let next_pc =
-        match s.goto with
-        | None -> pc + 1
-        | Some g ->
-          (match g.unconditional with
-           | Some lbl -> goto_target lbl
-           | None ->
-             (match outcome, g.on_success, g.on_failure with
-              | Success, Some lbl, _ -> goto_target lbl
-              | Failure, _, Some lbl -> goto_target lbl
-              | _ -> pc + 1))
-      in
-      run_from next_pc
-    end
-  end
+and run_from (_pc : int) : unit =
+  failwith "TODO: implement run_from (execute, then follow the goto field per the outcome)"
 
 let run (prog : program) : unit =
   program := prog;

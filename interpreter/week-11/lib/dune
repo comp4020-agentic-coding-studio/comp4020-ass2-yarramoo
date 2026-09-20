@@ -1,0 +1,8 @@
+; Week 10: widening [value] with VArray/VTable is meant to force every
+; existing match over a value to be revisited -- promote OCaml's
+; non-exhaustive-match warning (8) to a hard build error so that
+; forgetting a case anywhere is a compile failure, not a silent runtime
+; crash discovered later.
+(library
+ (name snobol)
+ (flags (:standard -warn-error +8)))

@@ -1,0 +1,19 @@
+* Checkpoint 3: replacement statements (subject, pattern, AND an
+* object) and conditional ("." ) binding used together.
+        GREETING = 'HELLO WORLD'
+        GREETING 'WORLD' = 'SNOBOL4'
+        OUTPUT = GREETING
+* A "." binding commits (Green Book step 4) before the replacement
+* object is even evaluated (step 5), so the bound variable is already
+* available for use *inside* the replacement text itself.
+        LINE = 'NAME: ALICE!'
+        LINE 'NAME: ' ARB . WHO '!' = 'HELLO, ' WHO '!'
+        OUTPUT = LINE
+* A pattern that fails to match makes the WHOLE statement fail before
+* the object/replacement are ever touched -- the subject is left
+* completely unchanged, and the goto field sees a Failure.
+        LINE2 = 'NAME: BOB'
+        LINE2 'AGE: ' ARB = 'SHOULD NOT APPEAR'     :F(NOAGE)
+        OUTPUT = 'UNREACHABLE'                       :(END)
+NOAGE   OUTPUT = 'CORRECTLY FAILED, LINE2 UNCHANGED = ' LINE2
+END     N = N

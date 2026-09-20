@@ -1,0 +1,66 @@
+=== examples/arbno_bal.sno ===
+ARBNO CAPTURED INTPART=3
+BAL CAPTURED GROUP=(A(B)C)
+
+=== examples/arrays.sno ===
+A<1>=10 A<2>=20 A<3>=30
+UNSET A<4>=[]
+B<1>=X B<2>=X B<3>=X
+OUT-OF-BOUNDS READ CORRECTLY FAILED
+ZERO INDEX CORRECTLY FAILED (1-BASED)
+
+=== examples/bind_replace.sno ===
+HELLO SNOBOL4
+HELLO, ALICE!
+CORRECTLY FAILED, LINE2 UNCHANGED = NAME: BOB
+
+=== examples/concat_alt.sno ===
+FOUND CAT OR DOG
+CORRECTLY DID NOT FIND DOG OR FISH
+FOUND CONSONANT-VOWEL-T PATTERN
+
+=== examples/literal.sno ===
+FOUND SNOBOL4
+COBOL NOT FOUND, AS EXPECTED
+
+=== examples/primitives.sno ===
+LEN(5) MATCHED ALL OF HELLO
+LEN(6) CORRECTLY FAILED (ONLY 5 CHARS)
+SPAN CAPTURED LEADING WHITESPACE: [   ]
+NOTANY CORRECTLY FAILED ON AN ALL-DIGIT SUBJECT
+LETTERS=ABC DIGITS=123
+ARB CAPTURED VAL=42
+
+=== examples/regression.sno ===
+2
+4
+6
+
+=== examples/tables.sno ===
+NAME=ADA YEAR=1815
+MISSING KEY CORRECTLY FAILED
+VIA ROW: ROW<1>=99
+VIA A FRESH FETCH: ROW2<1>=99
+
+--- recovery diagnostics demo ---
+$ dune exec bin/main.exe -- error_examples/recovery.sno
+line 15, column 18: expected an expression but found end of line
+line 31, column 21: expected ')' to close the '(' opened at line 31, column 15, but found end of line
+(exit code 1 -- recovered errors block execution, per main.ml)
+--- differential-testing harness (no CSNOBOL4 in this environment) ---
+$ ./scripts/diff_test.sh
+== building interpreter ==
+== CSNOBOL4_BIN is unset or not executable ==
+== no real CSNOBOL4 binary is available in this environment, so this run only
+== exercises this repo's own interpreter (and still catches its own crashes).
+== set CSNOBOL4_BIN=/path/to/csnobol4 to get a genuine differential comparison.
+OK (ran without crashing): arbno_bal.sno
+OK (ran without crashing): arrays.sno
+OK (ran without crashing): bind_replace.sno
+OK (ran without crashing): concat_alt.sno
+OK (ran without crashing): literal.sno
+OK (ran without crashing): primitives.sno
+OK (ran without crashing): regression.sno
+OK (ran without crashing): tables.sno
+== 8 example(s), 0 failure(s) ==
+== reminder: this was NOT a real differential comparison -- see above. ==

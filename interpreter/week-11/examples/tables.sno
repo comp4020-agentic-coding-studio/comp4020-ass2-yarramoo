@@ -1,0 +1,25 @@
+* Week 10: TABLE() and indexing with a non-integer key (research/
+* snobol/02-language-reference.md, "Arrays and tables"): a table is
+* keyed by any data object, not just integers, and grows dynamically
+* [GreenBook1971 SS1.13].
+        T = TABLE()
+        T<'NAME'> = 'ADA'
+        T<'YEAR'> = 1815
+        OUTPUT = 'NAME=' T<'NAME'> ' YEAR=' T<'YEAR'>
+* A missing key is a genuine failure, not a crash -- same treatment as
+* an out-of-bounds array read.
+        T<'MISSING'>                                 :S(BADKEY)
+        OUTPUT = 'MISSING KEY CORRECTLY FAILED'
+* Table identity: a value fetched from a table shares the same
+* underlying mutable structure as the table's own copy, so mutating it
+* through one variable is visible through a second, independent fetch
+* of the same key -- OCaml never copies an array or a Hashtbl value on
+* lookup.
+        T<'ROW'> = ARRAY(3)
+        ROW = T<'ROW'>
+        ROW<1> = 99
+        OUTPUT = 'VIA ROW: ROW<1>=' ROW<1>
+        ROW2 = T<'ROW'>
+        OUTPUT = 'VIA A FRESH FETCH: ROW2<1>=' ROW2<1>             :(END)
+BADKEY    OUTPUT = 'UNREACHABLE (MISSING KEY)'
+END       N = N

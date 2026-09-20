@@ -1,0 +1,12 @@
+* Checkpoint 3: the simplest possible pattern-match statement -- a
+* literal string pattern, with no replacement object. The statement
+* succeeds or fails exactly like any other statement (an assignment, a
+* comparison call), and the goto field branches on that the same way.
+        WORD = 'SNOBOL4 IS FUN'
+        WORD 'SNOBOL4'                            :F(NOMATCH)
+        OUTPUT = 'FOUND SNOBOL4'
+        WORD 'COBOL'                               :S(SHOULDNOTHAPPEN)
+        OUTPUT = 'COBOL NOT FOUND, AS EXPECTED'     :(END)
+NOMATCH OUTPUT = 'UNREACHABLE (POSITIVE MATCH FAILED)'
+SHOULDNOTHAPPEN OUTPUT = 'UNREACHABLE (NEGATIVE MATCH SUCCEEDED)'
+END     N = N

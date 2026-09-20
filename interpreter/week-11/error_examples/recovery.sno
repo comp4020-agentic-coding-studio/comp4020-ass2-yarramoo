@@ -1,0 +1,31 @@
+* error_examples/recovery.sno -- deliberately malformed. Unlike
+* everything under examples/, this file is never meant to run: main.ml
+* refuses to execute a program with any recovered parse errors, and
+* exists purely to demonstrate week-11's diagnostics feature by feature.
+*
+* It is not part of the standard per-example transcript convention
+* (dune exec bin/main.exe -- examples/*.sno, which expects every file to
+* be a valid, running program) or the differential-testing harness's
+* normal-operation demonstration -- see scripts/diff_test.sh, which only
+* ever points CSNOBOL4/this interpreter at examples/, never here.
+*
+* Run by hand with: dune exec bin/main.exe -- error_examples/recovery.sno
+
+* A located, single-token error: an operator with nothing after it.
+    BROKEN1 = 1 +
+
+* A well-formed statement sitting between two broken ones -- included to
+* show that one bad line does not stop a later good line from still
+* being considered, or a later bad line from still being reported. This
+* line's own statement is silently dropped from the recovered program
+* (parse_program never gets to return it, since the overall error list
+* is non-empty and main.ml won't run anything), but it costs nothing to
+* parse it correctly along the way.
+    FINE = 2 + 3
+
+* A two-location diagnostic: the '(' here is never closed. The message
+* names both where the parser gave up looking for ')' (end of this
+* line) and where the unmatched '(' was originally opened, rather than
+* just saying "expected ')'" and leaving the reader to hunt for which
+* paren is at fault.
+    BROKEN2 = (1 + 2

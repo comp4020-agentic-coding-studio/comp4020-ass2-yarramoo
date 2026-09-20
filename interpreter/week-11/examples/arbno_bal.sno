@@ -1,0 +1,20 @@
+* Checkpoint 3 (v2): ARBNO and BAL, the two Movement III primitives
+* this checkpoint originally shipped without -- see PROCESS.md and
+* interpreter/README.md's scope decisions for the disclosed fix.
+* research/snobol/03-pattern-matching.md: `ARBNO(p) = NULL | p
+* *ARBNO(p)`, and BAL is built from NOTANY + ARBNO, not a hand-written
+* paren-depth counter.
+* ARBNO(ANY(s)): grows shortest-first through a run of digits, only as
+* far as needed for what follows (here, up to the trailing '.').
+        S1 = '3.14159'
+        S1 ARBNO(ANY('0123456789')) . INTPART '.'   :F(BADARBNO)
+        OUTPUT = 'ARBNO CAPTURED INTPART=' INTPART
+* BAL: the shortest nonnull balanced-parenthesis run, bound with "."
+* just like any other pattern -- confirming BAL is a real composed
+* pattern value, not special-cased plumbing.
+        S2 = '(A(B)C)DE)'
+        S2 BAL . GROUP                              :F(BADBAL)
+        OUTPUT = 'BAL CAPTURED GROUP=' GROUP        :(END)
+BADARBNO  OUTPUT = 'UNREACHABLE (ARBNO)'
+BADBAL    OUTPUT = 'UNREACHABLE (BAL)'
+END       N = N

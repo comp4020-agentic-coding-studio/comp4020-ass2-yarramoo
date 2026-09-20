@@ -54,64 +54,23 @@ let is_alpha c = (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')
 let is_ident_char c = is_alpha c || is_digit c || c = '_'
 let is_blank c = c = ' ' || c = '\t'
 
-(* Tokenize a single logical line (no embedded newlines) into a token
-   list, terminated by EOF. Blank and comment-only lines yield [[EOF]]. *)
-let tokenize (line : string) : token list =
-  let n = String.length line in
-  let toks = ref [] in
-  let i = ref 0 in
-  let prev_was_blank = ref true in
-  (* true at start-of-line: treat "nothing before" like a blank so a
-     leading '-' is never misread as needing a left-hand concatenation
-     boundary that doesn't exist. *)
-  while !i < n do
-    let c = line.[!i] in
-    if is_blank c then begin
-      prev_was_blank := true;
-      incr i
-    end
-    else if is_digit c then begin
-      let start = !i in
-      while !i < n && is_digit line.[!i] do incr i done;
-      let s = String.sub line start (!i - start) in
-      toks := INT (int_of_string s) :: !toks;
-      prev_was_blank := false
-    end
-    else if is_alpha c then begin
-      let start = !i in
-      while !i < n && is_ident_char line.[!i] do incr i done;
-      let s = String.sub line start (!i - start) in
-      toks := IDENT s :: !toks;
-      prev_was_blank := false
-    end
-    else if c = '\'' || c = '"' then begin
-      let quote = c in
-      incr i;
-      let start = !i in
-      while !i < n && line.[!i] <> quote do incr i done;
-      if !i >= n then raise (Lex_error "unterminated string literal");
-      let s = String.sub line start (!i - start) in
-      incr i (* consume closing quote *);
-      toks := STR s :: !toks;
-      prev_was_blank := false
-    end
-    else begin
-      let space_before = !prev_was_blank in
-      let space_after = !i + 1 >= n || is_blank line.[!i + 1] in
-      (match c with
-       | '+' -> toks := PLUS :: !toks
-       | '-' ->
-         if space_before && not space_after then toks := MINUS_UNARY :: !toks
-         else toks := MINUS_BINARY :: !toks
-       | '*' -> toks := STAR :: !toks
-       | '/' -> toks := SLASH :: !toks
-       | '=' -> toks := EQUALS :: !toks
-       | '(' -> toks := LPAREN :: !toks
-       | ')' -> toks := RPAREN :: !toks
-       | other ->
-         raise (Lex_error (Printf.sprintf "unexpected character %c" other)));
-      incr i;
-      prev_was_blank := false
-    end
-  done;
-  List.rev (EOF :: !toks)
+(* TODO(checkpoint 1): implement [tokenize].
+   Tokenize a single logical line (no embedded newlines) into a token
+   list, terminated by EOF. Blank and comment-only lines should yield
+   [[EOF]].
+
+   You will need to handle: skipping blanks/tabs; scanning integer
+   literals; scanning identifiers ([is_alpha] then zero or more
+   [is_ident_char]); scanning single- or double-quoted string literals;
+   and the operator/paren characters, plus '=', '(', ')'.
+
+   The one genuinely tricky part is '-': it must come out as
+   [MINUS_UNARY] when a blank immediately precedes it AND no blank
+   immediately follows it, and [MINUS_BINARY] in every other case --
+   see the module comment above and
+   research/snobol/02-language-reference.md ("Arithmetic and blank
+   sensitivity") for exactly why. Track "was the previous character a
+   blank" as you scan (start it as [true], so a line-initial '-' behaves
+   correctly), and peek one character ahead to decide "space_after". *)
+let tokenize (_line : string) : token list =
+  failwith "TODO: implement the lexer (see the comment above tokenize)"

@@ -41,30 +41,30 @@ let assign name v =
   Hashtbl.replace env name v;
   if name = "OUTPUT" then print_endline (string_of_value v)
 
-let rec eval_expr (e : expr) : value =
-  match e with
-  | Int n -> VInt n
-  | Str s -> VStr s
-  | Var name -> lookup name
-  | Neg e -> VInt (- (to_int (eval_expr e)))
-  | Bin (op, l, r) ->
-    let a = to_int (eval_expr l) and b = to_int (eval_expr r) in
-    (match op with
-     | Add -> VInt (a + b)
-     | Sub -> VInt (a - b)
-     | Mul -> VInt (a * b)
-     | Div ->
-       (* Integer division truncates towards zero, per
-          research/snobol/02-language-reference.md: "5/2 is 2, 5/-2 is
-          -2" -- this is exactly OCaml's own [/] on ints, so no special
-          handling is needed here. *)
-       if b = 0 then failwith "division by zero" else VInt (a / b))
-  | Concat (l, r) ->
-    (* Concatenation by juxtaposition, not "+" -- see ast.ml. *)
-    let sl = string_of_value (eval_expr l) in
-    let sr = string_of_value (eval_expr r) in
-    VStr (sl ^ sr)
+(* TODO(checkpoint 1): implement the evaluator.
 
-let exec_stmt (Assign (name, e)) = assign name (eval_expr e)
+   [eval_expr] needs a case per Ast.expr constructor:
+   - Int / Str: wrap directly as VInt / VStr.
+   - Var: look the name up in the global environment (see [lookup]
+     above -- an unset variable is the null string, not an error).
+   - Neg: evaluate, coerce with [to_int], negate.
+   - Bin: evaluate both sides, coerce both with [to_int], apply the
+     operator. Integer division should truncate toward zero (OCaml's
+     own "/" on ints already does this -- see
+     research/snobol/02-language-reference.md, "Arithmetic and blank
+     sensitivity", for why that is the correct SNOBOL4 behaviour and
+     not an approximation of it).
+   - Concat: evaluate both sides, convert both to their string form
+     with [string_of_value], and concatenate the strings. This is the
+     juxtaposition rule from ast.ml -- concatenation is not "+".
 
-let run (prog : program) = List.iter exec_stmt prog
+   [exec_stmt] evaluates the right-hand side of an [Assign] and stores
+   it with [assign] (which already special-cases OUTPUT for you).
+   [run] just runs every statement in order. *)
+let eval_expr (_e : expr) : value =
+  failwith "TODO: implement eval_expr (see the comment above)"
+
+let exec_stmt (_s : stmt) : unit =
+  failwith "TODO: implement exec_stmt (evaluate the RHS, then assign it)"
+
+let run (prog : program) : unit = List.iter exec_stmt prog

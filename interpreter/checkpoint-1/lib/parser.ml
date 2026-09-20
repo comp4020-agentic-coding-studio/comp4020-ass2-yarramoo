@@ -33,68 +33,48 @@ let starts_operand = function
   | INT _ | STR _ | IDENT _ | LPAREN | MINUS_UNARY -> true
   | _ -> false
 
-let rec parse_primary st =
-  match advance st with
-  | INT n -> Int n
-  | STR s -> Str s
-  | IDENT name -> Var name
-  | LPAREN ->
-    let e = parse_concat st in
-    expect st RPAREN;
-    e
-  | _ -> raise (Parse_error "expected an expression")
+(* TODO(checkpoint 1): implement the parser's precedence chain.
 
-and parse_unary st =
-  match peek st with
-  | MINUS_UNARY -> ignore (advance st); Neg (parse_unary st)
-  | _ -> parse_primary st
+   You need six mutually-recursive pieces, highest precedence to lowest:
 
-and parse_muldiv st =
-  let lhs = ref (parse_unary st) in
-  let continue_ = ref true in
-  while !continue_ do
-    match peek st with
-    | STAR -> ignore (advance st); lhs := Bin (Mul, !lhs, parse_unary st)
-    | SLASH -> ignore (advance st); lhs := Bin (Div, !lhs, parse_unary st)
-    | _ -> continue_ := false
-  done;
-  !lhs
+   - [parse_primary]: INT / STR / IDENT / "( expr )".
+   - [parse_unary]: a leading [MINUS_UNARY] negates (build [Neg]),
+     otherwise just [parse_primary].
+   - [parse_muldiv]: left-associative "*" and "/" over [parse_unary].
+   - [parse_addsub]: left-associative "+" and [MINUS_BINARY] over
+     [parse_muldiv].
+   - [parse_concat]: lowest precedence -- while the next token
+     [starts_operand], glue on another [parse_addsub] result with
+     [Concat]. This is where "juxtaposition = concatenation" actually
+     happens; see the module comment and ast.ml.
+   - [parse_stmt]: expects exactly [IDENT = expr] (checkpoint 1's only
+     statement shape) and builds [Assign].
 
-and parse_addsub st =
-  let lhs = ref (parse_muldiv st) in
-  let continue_ = ref true in
-  while !continue_ do
-    match peek st with
-    | PLUS -> ignore (advance st); lhs := Bin (Add, !lhs, parse_muldiv st)
-    | MINUS_BINARY -> ignore (advance st); lhs := Bin (Sub, !lhs, parse_muldiv st)
-    | _ -> continue_ := false
-  done;
-  !lhs
+   [expect], [peek], [advance], and [starts_operand] above are the
+   utilities you'll build this from. *)
+(* NOTE: these will need to become "let rec ... and ... and ..." once you
+   fill them in for real, since they call each other. They're left as
+   independent stubs for now so the file compiles as-is. *)
+let parse_primary (_st : state) : expr =
+  failwith "TODO: implement parse_primary (INT / STR / IDENT / parenthesized expr)"
 
-(* Lowest precedence: repeatedly glue on another additive expression as
-   long as the next token could start one, with no operator consumed in
-   between -- that "nothing between them" is exactly what concatenation
-   is in SNOBOL4. *)
-and parse_concat st =
-  let lhs = ref (parse_addsub st) in
-  while starts_operand (peek st) do
-    lhs := Concat (!lhs, parse_addsub st)
-  done;
-  !lhs
+let parse_unary (_st : state) : expr =
+  failwith "TODO: implement parse_unary (leading MINUS_UNARY negates)"
+
+let parse_muldiv (_st : state) : expr =
+  failwith "TODO: implement parse_muldiv (left-associative * and /)"
+
+let parse_addsub (_st : state) : expr =
+  failwith "TODO: implement parse_addsub (left-associative + and MINUS_BINARY)"
+
+let parse_concat (_st : state) : expr =
+  failwith "TODO: implement parse_concat (juxtaposition = concatenation, lowest precedence)"
 
 let parse_expr st = parse_concat st
 
 (* A checkpoint-1 statement is exactly [IDENT = expr]. *)
-let parse_stmt (toks : token list) : stmt =
-  let st = { toks } in
-  match advance st with
-  | IDENT name ->
-    expect st EQUALS;
-    let e = parse_expr st in
-    (match peek st with
-     | EOF -> Assign (name, e)
-     | _ -> raise (Parse_error "trailing tokens after assignment"))
-  | _ -> raise (Parse_error "expected an assignment statement (IDENT = expr)")
+let parse_stmt (_toks : token list) : stmt =
+  failwith "TODO: implement parse_stmt (expect IDENT, EQUALS, an expr, then EOF)"
 
 (* Split source text into logical lines, dropping blank lines and
    comment lines (a '*' in column 1, the real SNOBOL4 convention -- see

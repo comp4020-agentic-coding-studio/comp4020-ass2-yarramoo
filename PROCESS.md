@@ -100,3 +100,61 @@ explicit-stack matcher, where `ARBNO` and `BAL` are instead rewritten in
 terms of the matcher's existing choice-point machinery — the same primitive,
 two genuinely different implementation strategies, each fitted to its own
 matcher's architecture rather than one copied onto the other.
+
+The last two weeks of that per-week build were the most expensive on
+purpose, since each genuinely extends the language rather than cutting an
+already-built feature down to size. Week 10
+([`8df84b9`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/8df84b9)
+solution,
+[`e897604`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/e897604)
+starter,
+[`875f652`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/875f652)
+zip) adds `ARRAY`/`TABLE` to the value type, routes out-of-bounds/missing-key
+lookups through the same failure mechanism as everything else rather than an
+OCaml exception, and turns on `-warn-error +8` — I confirmed table identity
+(not just equality) held by writing a program that mutates a stored value
+through one table reference and reads the mutation back through a second,
+independent lookup of the same key, since a copy-on-read implementation
+would pass a naive equality test and fail exactly this one. Week 11
+([`89c402a`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/89c402a)
+solution,
+[`7688c5f`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/7688c5f)
+starter,
+[`419c9f0`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/419c9f0)
+zip) threads source positions through the lexer and parser, turns syntax
+errors into located diagnostics (including a two-location one — an unmatched
+`(`, reported with both where it opened and where a `)` was expected but
+never found), and adds one documented recovery strategy: a malformed line's
+error is recorded and parsing continues, so a file with several mistakes
+reports all of them together instead of stopping at the first. `main.ml`
+still refuses to run any program with recorded errors, so recovery earns you
+a complete diagnostic report, not silent partial execution. Its starter
+needed a third stub shape, distinct from the whole-function and partial
+stubs checkpoint 3 already established — documented in
+`interpreter/README.md` — because a `failwith` stub on any of the three
+affected functions would have broken ordinary, already-working parsing, not
+just the new diagnostics. The differential-testing harness
+(`scripts/diff_test.sh`) is real and runnable, but this build environment has
+no CSNOBOL4 binary to compare against; rather than fabricate a disagreement
+or silently skip half of what the session page promises, the harness detects
+the missing binary, says so in its own output, and falls back to an honest
+crash-catching mode against this interpreter alone — the committed
+transcript (`interpreter/transcripts/week-11.txt`) shows exactly that
+degraded run, not an invented comparison.
+
+Scoping the week-11 work also surfaced a fourth process gap, wider than the
+first pass had assumed: `week-01.md` told students to build their week-1
+lexer with `ocamllex`, but the real, already-shipped `checkpoint-1` (and
+every checkpoint and week after it) uses a hand-rolled lexer instead,
+specifically because of the blank-sensitivity rule that same
+`ocamllex`-based approach can't express cleanly. The same false claim had
+also spread to `checkpoint-1.md`'s brief and `lectures/week-01.md`'s
+toolchain discussion — three pages, not the one originally scoped, all
+citing the same wrong fact — so all three were corrected together in
+[`395cd58`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/395cd58)
+rather than fixing the one and leaving the other two live. The 8
+non-checkpoint session pages then got their own real "Sample transcript"
+sections and starter-zip links in
+[`4b7c1e7`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/4b7c1e7),
+quoting each week's own genuinely-captured transcript verbatim, the same
+discipline the four checkpoint pages already held to.

@@ -1,70 +1,104 @@
 # SLOP6753 reference interpreter
 
 This directory is the real, working OCaml implementation behind
-"Implementing SNOBOL4" (SLOP6753). It is not decorative: every checkpoint
-below is a genuinely compiling, genuinely runnable dune project, built
-against real research on SNOBOL4's actual semantics in `research/snobol/`
-(one directory up, outside this tree). Where this subset simplifies or
-deviates from the real language, that deviation is called out explicitly
-in the relevant checkpoint's notes below and in comments in the code --
-this is a small teaching subset, not a claim of full SNOBOL4 conformance.
+"Implementing SNOBOL4" (SLOP6753). It is not decorative: every week and
+checkpoint below is a genuinely compiling, genuinely runnable dune
+project, built against real research on SNOBOL4's actual semantics in
+`research/snobol/` (one directory up, outside this tree). Where this
+subset simplifies or deviates from the real language, that deviation is
+called out explicitly in the relevant week's notes below and in comments
+in the code -- this is a small teaching subset, not a claim of full
+SNOBOL4 conformance.
 
 ## Layout
 
 ```
 interpreter/
-  checkpoint-1/   lexing, arithmetic, variables, strings
-  checkpoint-2/   success/failure control flow, DEFINE
-  checkpoint-3/   the pattern sub-language
+  week-01/        a hand-rolled lexer for bare integer literals
+  week-02/        + a Pratt parser and evaluator for arithmetic
+  week-03/        + variables, assignment, a symbol table
+  checkpoint-1/   (= week 4) + strings and concatenation
+  week-05/        + the goto field, Fail_signal, comparison predicates
+  checkpoint-2/   (= week 6) + DEFINE, call frames, RETURN/FRETURN
+  week-07/        + pattern values and a backtracking matcher (literal,
+                    concatenation, alternation only)
+  week-08/        + ANY, NOTANY, SPAN, BREAK, ARB, ARBNO, BAL
+  checkpoint-3/   (= week 9) + `.`/`$`/`@` capture, all seven primitives
+  week-10/        + ARRAY/TABLE, fail-not-throw indexing, exhaustiveness
+                    promoted to a hard error
+  week-11/        + source positions, located diagnostics, one recovery
+                    strategy, a differential-testing harness script
+  error_examples/ (week-11 only) deliberately malformed programs that
+                    exist to exercise diagnostics, never to run
+  scripts/        (week-11 only) diff_test.sh, the differential-testing
+                    harness
   transcripts/    real captured terminal output from each solution
 ```
 
-Each `checkpoint-N/` is a **standalone** dune project (its own
-`dune-project`, `bin/`, `lib/`, `examples/`). Checkpoint 2 is built by
-starting from checkpoint 1's solution and adding to it; checkpoint 3
-starts from checkpoint 2's solution the same way. That is a deliberate
-choice, not an accident of copy-pasting: it means a student can download
-just `checkpoint-2/`, for instance, and have a complete, buildable project
-that already contains a working front end and evaluator, with only the
-new material (control flow, `DEFINE`) left to fill in -- they are not
-handed a partial skeleton that can't compile until the whole thing is
-finished.
+Every `week-0N/` and `checkpoint-N/` directory is a **standalone** dune
+project (its own `dune-project`, `bin/`, `lib/`, `examples/`), and each is
+built by extending the previous one's *solution* -- week 2 starts from
+week 1's solution, checkpoint 1 starts from week 3's solution, week 5
+starts from checkpoint 1's solution, and so on all the way to week 11.
+That is a deliberate choice, not an accident of copy-pasting: it means a
+student can download just `week-05/`, for instance, and have a complete,
+buildable project that already contains a working front end, symbol
+table, and expression evaluator, with only that week's new material (the
+goto field, the predicates) left to fill in -- they are not handed a
+partial skeleton that can't compile until the whole thing is finished.
+Only three of these twelve weekly directories -- `checkpoint-1`,
+`checkpoint-2`, `checkpoint-3` -- are also graded assessment items; the
+other nine (`week-01`, `02`, `03`, `05`, `07`, `08`, `10`, `11`, and the
+open-ended final project) are ungraded studio work with the same real,
+downloadable starter+solution treatment, for the same reason: a session
+page that promises working code should have working code behind it,
+whether or not that code is submitted for marks.
 
-## Building and running a checkpoint
+## Building and running a week or checkpoint
 
-From inside any `checkpoint-N/` directory:
+From inside any `week-0N/` or `checkpoint-N/` directory:
 
 ```
 dune build
 dune exec bin/main.exe -- examples/<name>.sno
 ```
 
-Each checkpoint's `examples/` directory has a handful of small `.sno`
-programs written specifically to exercise that checkpoint's new feature
-set (and, from checkpoint 2 onward, to double-check the previous
-checkpoint's features still work unchanged).
+Each directory's `examples/` directory has a handful of small `.sno`
+programs written specifically to exercise that week's new feature set
+(and, from week 2 onward, to double-check the previous week's features
+still work unchanged). Week 11 additionally has `error_examples/` --
+deliberately malformed programs, never meant to run, that exist only to
+exercise its diagnostics -- and `scripts/diff_test.sh`, a differential-
+testing harness that runs `examples/*.sno` through both this interpreter
+and (if you point `CSNOBOL4_BIN` at one) a real CSNOBOL4 binary. No
+CSNOBOL4 binary shipped with this course's own build environment, so its
+own captured transcript runs the harness in its honest degraded mode --
+see the harness's own output, and `interpreter/transcripts/week-11.txt`,
+rather than a fabricated disagreement.
 
 ## Solution / starter / zip mechanic
 
-For each checkpoint `N`:
+For each week or checkpoint `N`:
 
-- The **solution** is the real, finished implementation for that
-  checkpoint -- it compiles, runs, and passes its own examples. It is
-  committed and tagged `checkpoint-N-solution`.
+- The **solution** is the real, finished implementation for that week --
+  it compiles, runs, and passes its own examples. It is committed and
+  tagged `week-0N-solution` (or `checkpoint-N-solution`).
 - The **starter** is produced by taking the solution and replacing that
-  checkpoint's *new* logic (only the new logic -- everything inherited
-  from the previous checkpoint's solution is left working) with
-  `failwith "TODO: ..."` stubs, each with a short comment pointing at what
-  a student needs to implement. The starter still *compiles* -- it fails
-  only at runtime, on the specific programs that exercise the missing
-  feature. It is committed separately and tagged `checkpoint-N-starter`.
-- A downloadable zip of just that checkpoint's starter is generated with
-  `git archive` from the `checkpoint-N-starter` tag, scoped to
-  `interpreter/checkpoint-N/` only, and published under
-  `public/downloads/checkpoint-N-starter.zip`.
+  week's *new* logic (only the new logic -- everything inherited from the
+  previous week's solution is left working) with `failwith "TODO: ..."`
+  stubs, each with a short comment pointing at what a student needs to
+  implement. The starter still *compiles* -- it fails only at runtime, on
+  the specific programs that exercise the missing feature. It is
+  committed separately and tagged `week-0N-starter` (or
+  `checkpoint-N-starter`).
+- A downloadable zip of just that week's starter is generated with
+  `git archive` from the starter tag, scoped to that week's own directory
+  only, and published under `public/downloads/week-0N-starter.zip` (or
+  `checkpoint-N-starter.zip`).
 - A real terminal transcript -- the solution binary actually invoked
   against its own example programs, output captured verbatim, not
-  hand-written -- lives at `interpreter/transcripts/checkpoint-N.txt`.
+  hand-written -- lives at `interpreter/transcripts/week-0N.txt` (or
+  `checkpoint-N.txt`).
 
 Checkpoint 3's starter departs from the whole-function-stub style above
 in two spots, deliberately: `parse_bind` (postfix `.`) and `parse_alt`
@@ -78,6 +112,26 @@ Everything else stubbed in checkpoint 3 (`parse_body`'s pattern branch,
 and `to_pattern`/`eval_pattern_primitive`/`match_pat`/`find_match`/
 `exec_stmt`'s `Match` case in `eval.ml`) uses the ordinary whole-function
 style described above.
+
+Week 11's starter introduces a third stub shape, distinct from both of the
+above: a whole-function stub that still works, just less capably, with no
+`failwith` at all. Three functions in `parser.ml` get this treatment --
+`err_at` (drops the location prefix but still raises a genuine, catchable
+`Parse_error`), `expect_matching` (drops the two-location diagnostic and
+falls back to `expect`'s single-location one), and `try_parse_line` (has
+no `try`/`with` at all, so the *first* malformed line's exception
+propagates uncaught instead of being recovered and reported alongside
+every other error). None of these can be a `failwith` stub, because a
+`failwith` would break every one of the eight valid programs under
+`examples/` the moment parsing reached the stubbed function -- and all
+eight must still parse and run identically under the starter, since
+locating and recovering from errors is *additional* behaviour on top of
+successful parsing, not a replacement for it. The starter has been
+verified to reproduce all eight examples' output unchanged, and to
+degrade `error_examples/recovery.sno` from the solution's two-error,
+exit-1 recovery report down to a single uncaught, unlocated exception --
+still wrong in an obviously incomplete way, just not a crash on ordinary
+input.
 
 To see exactly what's stubbed out in a given starter, diff it against its
 own solution tag, e.g.:
@@ -96,7 +150,7 @@ onto OCaml's sum types and pattern matching directly, rather than needing
 to be emulated with sentinel values or hand-rolled tagged structs in an
 imperative host language.
 
-The lexer in every checkpoint is hand-rolled (not generated by
+The lexer in every week and checkpoint is hand-rolled (not generated by
 `ocamllex`). The reason is specific, not general suspicion of generators:
 SNOBOL4's blank-sensitivity rule for `+ - * /` (a binary operator needs a
 blank on both sides; a unary operator needs *no* blank between it and its

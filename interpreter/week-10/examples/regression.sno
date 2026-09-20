@@ -1,0 +1,10 @@
+* Checkpoint 3 regression check: checkpoint 2's control flow and
+* DEFINE still work completely unchanged -- adding the pattern
+* sublanguage added new statement forms, it did not touch these.
+        DEFINE('DOUBLE(X)')
+        N = 1
+LOOP    OUTPUT = DOUBLE(N)
+        N = N + 1
+        GT(N,3)                  :F(LOOP)
+END     N = N
+DOUBLE  DOUBLE = X * 2           :(RETURN)

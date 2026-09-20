@@ -1,0 +1,37 @@
+* Checkpoint 3: the primitive patterns LEN, SPAN, BREAK, NOTANY, and
+* ARB, plus conditional ("." ) binding, each isolated so its actual
+* behaviour (not a guess at it) is on display -- see
+* research/snobol/03-pattern-matching.md, "The primitive patterns".
+        S1 = 'HELLO'
+        S1 LEN(5)                                   :F(BADLEN)
+        OUTPUT = 'LEN(5) MATCHED ALL OF HELLO'
+        S1 LEN(6)                                   :S(BADLEN)
+        OUTPUT = 'LEN(6) CORRECTLY FAILED (ONLY 5 CHARS)'
+* SPAN(s): the longest run (>=1 char) drawn from s. Bound with "." so
+* we can see exactly what it captured.
+        S2 = '   HELLO'
+        S2 SPAN(' ') . LEADSPACE 'HELLO'            :F(BADSPAN)
+        OUTPUT = 'SPAN CAPTURED LEADING WHITESPACE: [' LEADSPACE ']'
+* NOTANY(s): exactly one character not in s -- on an all-digit subject
+* there is no such position anywhere, so the match genuinely fails.
+        S5 = '123'
+        S5 NOTANY('0123456789')                     :S(BADNOTANY)
+        OUTPUT = 'NOTANY CORRECTLY FAILED ON AN ALL-DIGIT SUBJECT'
+* BREAK(s): the longest run NOT in s (stops just before a character of
+* s, may be null). Concatenating BREAK(digits) then SPAN(digits) splits
+* a "letters then digits" string into its two halves in one statement.
+        S3 = 'ABC123'
+        S3 BREAK('0123456789') . LETTERS SPAN('0123456789') . DIGITS  :F(BADBREAK)
+        OUTPUT = 'LETTERS=' LETTERS ' DIGITS=' DIGITS
+* ARB: shortest possible run (starts at null), extending by one
+* character each time it is retried, only as far as it needs to for
+* whatever follows it to match -- here, up to the next ';'.
+        S4 = 'X=42;'
+        S4 'X=' ARB . VAL ';'                       :F(BADARB)
+        OUTPUT = 'ARB CAPTURED VAL=' VAL             :(END)
+BADLEN    OUTPUT = 'UNREACHABLE (LEN)'
+BADSPAN   OUTPUT = 'UNREACHABLE (SPAN)'
+BADNOTANY OUTPUT = 'UNREACHABLE (NOTANY)'
+BADBREAK  OUTPUT = 'UNREACHABLE (BREAK/SPAN)'
+BADARB    OUTPUT = 'UNREACHABLE (ARB)'
+END       N = N

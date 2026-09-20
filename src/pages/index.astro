@@ -1,10 +1,88 @@
 ---
+import { getPublishedCollection } from "astro-course-university/content";
 import Card from "astro-theme-university/components/Card.astro";
 import CardGrid from "astro-theme-university/components/CardGrid.astro";
 import ContentLayout from "astro-theme-university/layouts/ContentLayout.astro";
+import { withBase } from "astro-theme-university/url";
 import heroImage from "../assets/images/hero-home.avif";
+import { formatCourseDate } from "../lib/dates";
 import { courseMeta } from "../course-config";
 import { sessionLabels, siteConfig } from "../site-config";
+
+const [lectures, sessions, assessments] = await Promise.all([
+  getPublishedCollection("lectures"),
+  getPublishedCollection("sessions"),
+  getPublishedCollection("assessments"),
+]);
+
+const byWeek = <T extends { data: { week: number } }>(entries: T[]) => {
+  const map = new Map<number, T[]>();
+  for (const entry of entries) {
+    const bucket = map.get(entry.data.week) ?? [];
+    bucket.push(entry);
+    map.set(entry.data.week, bucket);
+  }
+  return map;
+};
+
+const lecturesByWeek = byWeek(lectures);
+const sessionsByWeek = byWeek(sessions);
+const assessmentsByWeek = byWeek(assessments);
+
+const weeks = Array.from({ length: 12 }, (_, i) => {
+  const week = i + 1;
+  const lecture = lecturesByWeek.get(week)?.[0];
+  const session = sessionsByWeek.get(week)?.[0];
+  const due = assessmentsByWeek.get(week) ?? [];
+  return { week, lecture, session, due };
+});
+
+const movements = [
+  {
+    name: "Movement I",
+    title: "A Calculator That Talks Back",
+    weeks: "1–4",
+    blurb:
+      "A lexer, a parser, and a tree-walking evaluator for integer and " +
+      "string literals, arithmetic, variables, and concatenation. Small " +
+      "enough to finish in four weeks, load-bearing enough that everything " +
+      "after it sits on top of it rather than beside it.",
+    checkpoint: assessments.find((a) => a.id === "checkpoint-1"),
+  },
+  {
+    name: "Movement II",
+    title: "Programs That Can Fail",
+    weeks: "5–6",
+    blurb:
+      "Success and failure become the language's only branching primitive " +
+      "— no if, no while, no for. The goto field turns the expression " +
+      "evaluator into a statement executor, and DEFINE adds functions " +
+      "built from ordinary call frames, not new syntax.",
+    checkpoint: assessments.find((a) => a.id === "checkpoint-2"),
+  },
+  {
+    name: "Movement III",
+    title: "The Engine Underneath",
+    weeks: "7–9",
+    blurb:
+      "The course's stated centre of gravity: patterns as first-class, " +
+      "backtracking values. Concatenation, alternation, ARB, ARBNO, BAL, " +
+      "SPAN and BREAK, and the conditional-assignment operator that " +
+      "captures what a match actually consumed.",
+    checkpoint: assessments.find((a) => a.id === "checkpoint-3"),
+  },
+  {
+    name: "Movement IV",
+    title: "What Kind of Thing Is a Value",
+    weeks: "10–12",
+    blurb:
+      "Dynamic typing made explicit — DATATYPE, CONVERT, ARRAY, TABLE, and " +
+      "DATA — followed by the diagnostics a correct interpreter still owes " +
+      "a confused user, and a self-chosen extension to Checkpoint 3's " +
+      "engine as the final project.",
+    checkpoint: assessments.find((a) => a.id === "final-project"),
+  },
+];
 
 // STARTER_CONTENT: replace the hero artwork and its alt text below, then
 // remove this comment.
@@ -21,18 +99,131 @@ import { sessionLabels, siteConfig } from "../site-config";
     {courseMeta.tags.map((tag) => <li>{tag}</li>)}
   </ul>
 
-  <!-- STARTER_CONTENT: replace the authored page below, then remove this comment. -->
   <h2>What you will do</h2>
   <p>
-    Say what a student spends their time on — the making, reading, arguing or
-    measuring that fills the weeks. Name the artefact they walk out with.
+    You will build a working compiler front end and a genuinely backtracking
+    pattern-matching engine for SNOBOL4, a 1962 Bell Labs language, in OCaml —
+    by hand, in four incremental stages, each one a real codebase you download
+    and complete rather than a toy exercise. Every checkpoint hands you a
+    partially-implemented interpreter (the previous stage's working solution,
+    with exactly this week's new feature stubbed out) and a genuine captured
+    transcript of what the finished version prints, so "done" is never a
+    matter of opinion. By week 9 your own interpreter runs real SNOBOL4
+    programs that concatenate, alternate, and backtrack over patterns
+    correctly; by week 12 it does something none of your classmates'
+    necessarily do, because the final project is a self-chosen extension you
+    build, measure, and write up honestly.
   </p>
 
   <h2>Who it is for</h2>
   <p>
-    Say who this is aimed at and what they need to already know. Be specific
-    enough that someone can rule themselves in or out without emailing you.
+    This is a postgraduate compiler-construction studio, not an introduction
+    to programming. You should already be comfortable reading and writing
+    recursive data types and pattern matching in an ML-family language, or
+    willing to pick that up fast in week 1 — the studios assume you can debug
+    your own `match` exhaustiveness errors with a tutor's help, not that
+    someone will explain what a variant type is. No prior exposure to SNOBOL4
+    itself is expected; almost nobody has any. What matters is a willingness
+    to sit with a genuinely strange, fifty-year-old design decision — success
+    and failure as the only control-flow primitive, patterns as data instead
+    of syntax — long enough to see why it was made, rather than reaching
+    immediately for how a modern language would do it instead.
   </p>
+
+  <h2>The four movements</h2>
+  <p>
+    Twelve teaching weeks are organised into four movements, each ending at a
+    graded checkpoint. Movements I and II build the scaffolding; Movement III
+    is where the actual pattern engine gets written; Movement IV asks what a
+    dynamically-typed value is, once patterns are one more entry on that
+    list, and closes with a project of your own design.
+  </p>
+  <div class="movements">
+    {
+      movements.map((movement) => (
+        <article class="movement">
+          <p class="movement-label">
+            {movement.name} · weeks {movement.weeks}
+          </p>
+          <h3>{movement.title}</h3>
+          <p>{movement.blurb}</p>
+          {movement.checkpoint && (
+            <p class="movement-checkpoint">
+              <a href={withBase(`/assessments/${movement.checkpoint.id}/`)}>
+                {movement.checkpoint.data.title}
+              </a>
+              {movement.checkpoint.data.due &&
+                ` — due ${formatCourseDate(movement.checkpoint.data.due)}`}
+              {movement.checkpoint.data.weight != null &&
+                ` (${movement.checkpoint.data.weight}%)`}
+            </p>
+          )}
+        </article>
+      ))
+    }
+  </div>
+
+  <h2>Full schedule</h2>
+  <p>
+    Every lecture, studio, and assessment due date, read directly from the
+    course's own content — this table cannot drift out of sync with the
+    pages it links to.
+  </p>
+  <div class="schedule-wrapper">
+    <table class="schedule">
+      <thead>
+        <tr>
+          <th scope="col">Week</th>
+          <th scope="col">Lecture</th>
+          <th scope="col">Studio</th>
+          <th scope="col">Due</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          weeks.map(({ week, lecture, session, due }) => (
+            <tr>
+              <th scope="row">{week}</th>
+              <td>
+                {lecture ? (
+                  <a href={withBase(`/lectures/${lecture.id}/`)}>
+                    {lecture.data.title}
+                  </a>
+                ) : (
+                  "—"
+                )}
+              </td>
+              <td>
+                {session ? (
+                  <a href={withBase(`/sessions/${session.id}/`)}>
+                    {session.data.title}
+                  </a>
+                ) : (
+                  "—"
+                )}
+              </td>
+              <td>
+                {due.length > 0 ? (
+                  due.map((assessment, i) => (
+                    <>
+                      {i > 0 && <br />}
+                      <a href={withBase(`/assessments/${assessment.id}/`)}>
+                        {assessment.data.title}
+                      </a>
+                      {assessment.data.weight != null &&
+                        ` (${assessment.data.weight}%)`}
+                    </>
+                  ))
+                ) : (
+                  "—"
+                )}
+              </td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
 
   <h2>Where to go next</h2>
   <CardGrid columns={2}>
@@ -64,5 +255,49 @@ import { sessionLabels, siteConfig } from "../site-config";
     color: var(--at-text-secondary);
     background: var(--at-bg-alt);
     font-size: 0.9rem;
+  }
+
+  .movements {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 1.5rem;
+    margin-block: 1.5rem 2rem;
+  }
+
+  .movement {
+    border-top: 2px solid var(--at-text);
+    padding-top: 0.75rem;
+  }
+
+  .movement-label {
+    margin: 0;
+    font-size: 0.85rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--at-text-secondary);
+  }
+
+  .movement h3 {
+    margin-block: 0.25rem 0.5rem;
+  }
+
+  .movement-checkpoint {
+    margin-block: 0.75rem 0;
+    font-size: 0.9rem;
+  }
+
+  .schedule-wrapper {
+    overflow-x: auto;
+    margin-block: 1.5rem 2rem;
+  }
+
+  .schedule {
+    width: 100%;
+    min-width: 32rem;
+  }
+
+  .schedule th[scope="row"] {
+    text-align: left;
+    font-variant-numeric: tabular-nums;
   }
 </style>

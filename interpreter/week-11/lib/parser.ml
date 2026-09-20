@@ -90,10 +90,19 @@ let advance (st : state) : token =
   | pt :: rest -> st.toks <- rest; pt.tok
   | [] -> EOF
 
-(* Always raise with a location and the actual token name -- see the
-   module comment. *)
-let err_at (p : pos) (msg : string) : 'a =
-  raise (Parse_error (Printf.sprintf "line %d, column %d: %s" p.line p.col msg))
+(* TODO(week 11): normally formats a location into every Parse_error
+   message (`"line L, column C: <msg>"`) -- see the solution's version
+   of this comment for the full rationale. This starter version still
+   raises a genuine, catchable [Parse_error] with [msg] itself intact,
+   so anything that only relies on *catching* a parse error (every
+   caller of [err_at], the whole grammar) still behaves identically; it
+   is only the location prefix that is missing. Deliberately NOT a
+   [failwith] stub, unlike this file's other TODOs: every single raise
+   site in the entire parser funnels through [err_at], so an
+   unimplemented [err_at] would turn *every* parse error anywhere in
+   the grammar into an interpreter crash -- misrepresenting "diagnostics
+   aren't located yet" as "the parser doesn't work." *)
+let err_at (_p : pos) (msg : string) : 'a = raise (Parse_error msg)
 
 let expect (st : state) (t : token) : unit =
   let p = cur_pos st in
@@ -102,21 +111,21 @@ let expect (st : state) (t : token) : unit =
     err_at p
       (Printf.sprintf "expected %s but found %s" (string_of_token t) (string_of_token got))
 
-(* The two-location form of [expect]: used only where this grammar has a
-   real opening/closing delimiter pair. [open_pos] is where the opening
-   delimiter itself was found (captured by the caller before parsing
-   whatever sits between the delimiters); if the closing delimiter is
-   missing, the error names both where parsing actually stopped *and*
-   where the unmatched opener was, so a reader isn't left guessing which
-   of possibly several parens on the line is the culprit. *)
-let expect_matching (st : state) (open_tok : token) (open_pos : pos) (close_tok : token) : unit =
-  let close_pos = cur_pos st in
-  let got = advance st in
-  if got <> close_tok then
-    err_at close_pos
-      (Printf.sprintf "expected %s to close the %s opened at line %d, column %d, but found %s"
-         (string_of_token close_tok) (string_of_token open_tok) open_pos.line open_pos.col
-         (string_of_token got))
+(* TODO(week 11): normally names *both* where the closing delimiter was
+   expected/found-wrong and where the corresponding opening delimiter
+   was originally found -- see the solution's version of this comment.
+   This starter version still correctly detects and reports a
+   missing/mismatched closing delimiter (via [expect]); it just falls
+   back to [expect]'s single-location message instead of also naming
+   the opener's position. Deliberately NOT a [failwith] stub: this
+   function sits on the only two real delimiter-pair sites in the
+   grammar (a parenthesized expression and a call's argument list), so
+   an unimplemented [expect_matching] would crash on completely
+   ordinary, already-working parsing of `(expr)` and `f(a, b)` -- ie.
+   every checkpoint-3-and-earlier program, not just this week's new
+   diagnostics. *)
+let expect_matching (st : state) (_open_tok : token) (_open_pos : pos) (close_tok : token) : unit =
+  expect st close_tok
 
 let starts_operand = function
   | INT _ | STR _ | IDENT _ | LPAREN | MINUS_UNARY -> true
@@ -357,20 +366,24 @@ let split_label (line : string) : string option * string =
     else (Some (String.sub line 0 !i), String.sub line !i (n - !i))
   end
 
-(* Week 11's recovery strategy lives entirely in this one function: parse
-   a single already-tokenized line, and turn a [Parse_error]/
-   [Lexer.Lex_error] raised while doing so into [(None, [msg])] instead
-   of letting the exception escape -- so [parse_program] below can skip
-   this line and keep going instead of aborting the whole file at the
-   first mistake. See the module comment for why a source line is a
-   safe, unambiguous resynchronization point in this grammar
-   specifically (this subset already requires one statement per line, so
-   nothing needs to guess where the next statement starts). *)
+(* TODO(week 11): normally catches a [Parse_error]/[Lexer.Lex_error]
+   raised while parsing one line and turns it into [(None, [msg])], so
+   [parse_program] can skip the bad line and keep going instead of
+   aborting the whole file at the first mistake -- see the solution's
+   version of this comment. This starter version has no try/with at
+   all: every line still parses exactly via [parse_stmt] as it always
+   has, so every syntactically valid program is completely unaffected.
+   What's missing is purely the *recovery* behavior: a malformed
+   program still reports its first error, via OCaml's own uncaught-
+   exception message, it just doesn't find and report every other error
+   in the file in that same run (compare error_examples/recovery.sno's
+   two, both-reported-together errors under the solution). Deliberately
+   NOT a [failwith] stub: a parser that already works perfectly on
+   every valid program is not "unimplemented," it's merely "not yet
+   resilient to a malformed one" -- materially different from, and far
+   less broken than, every other TODO in this codebase. *)
 let try_parse_line (label : string option) (toks : Lexer.postok list) : stmt option * string list =
-  try (Some (parse_stmt label toks), [])
-  with
-  | Parse_error msg -> (None, [ msg ])
-  | Lexer.Lex_error msg -> (None, [ msg ])
+  (Some (parse_stmt label toks), [])
 
 (* Parse every non-blank, non-comment line independently via
    [try_parse_line], collecting the statements that parsed and every

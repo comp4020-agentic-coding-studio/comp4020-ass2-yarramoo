@@ -69,6 +69,17 @@ let starts_operand = function
    unary minus, * /, + -, concatenation. Mutually recursive because a
    parenthesized expression and a call's argument list both bottom back
    out through the whole chain. *)
+(* TODO(week 10): when an [IDENT] is immediately followed by [LANGLE],
+   this is an indexing expression, `A<I>` -- consume the [LANGLE],
+   parse the index with [parse_alt] (the whole expression grammar, same
+   as an argument to a call), expect a closing [RANGLE], and build
+   [Index (name, idx)]. Deliberately NOT a whole-function [failwith]
+   stub, for the same reason [parse_bind]/[parse_alt] elsewhere in this
+   file aren't: [parse_primary] is the base of the *entire* expression
+   grammar, so the [LPAREN] call-syntax branch above (inherited,
+   working) and the plain-[Var] fallback below must keep working
+   unmodified for every checkpoint-3 program that never uses `<`; only
+   the actual [LANGLE] case is unimplemented. *)
 let rec parse_primary (st : state) : expr =
   match advance st with
   | INT n -> Int n
@@ -79,12 +90,9 @@ let rec parse_primary (st : state) : expr =
       let args = parse_arglist st in
       expect st RPAREN;
       Call (name, args)
-    end else if peek st = LANGLE then begin
-      ignore (advance st);
-      let idx = parse_alt st in
-      expect st RANGLE;
-      Index (name, idx)
-    end else Var name
+    end else if peek st = LANGLE then
+      failwith "TODO: week 10 -- parse indexing, A<I> (see the comment above)"
+    else Var name
   | LPAREN ->
     let e = parse_alt st in
     expect st RPAREN;
@@ -236,10 +244,11 @@ let parse_body (st : state) : stmt_body =
       ignore (advance st);
       let obj = parse_expr st in
       Assign (name, obj)
-    | Index (name, idx) ->
-      ignore (advance st);
-      let obj = parse_expr st in
-      IndexAssign (name, idx, obj)
+    | Index (_name, _idx) ->
+      failwith
+        "TODO: week 10 -- parse indexed assignment, A<I> = expr (see \
+         ast.ml's IndexAssign); unreachable until parse_primary's \
+         [LANGLE] case above is implemented"
     | _ -> raise (Parse_error "left-hand side of '=' must be a plain identifier or an indexed variable"))
   | t when starts_operand t ->
     let pattern = parse_alt st in

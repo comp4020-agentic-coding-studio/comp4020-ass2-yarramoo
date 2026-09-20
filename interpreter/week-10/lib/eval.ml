@@ -273,13 +273,17 @@ let bal : pattern = PConcat (balexp, PArbno balexp)
    of the size given at creation), not a fixed size. *)
 let is_data_constructor name = name = "ARRAY" || name = "TABLE"
 
-let eval_data_constructor (name : string) (args : value list) : value =
-  match name, args with
-  | "ARRAY", [ n ] -> VArray (Array.make (to_int n) (VStr ""))
-  | "ARRAY", [ n; init ] -> VArray (Array.make (to_int n) init)
-  | "TABLE", [] -> VTable (Hashtbl.create 16)
-  | "TABLE", [ n ] -> VTable (Hashtbl.create (to_int n))
-  | _ -> failwith (Printf.sprintf "malformed %s call" name)
+(* TODO(week 10): build the actual value. `ARRAY(n)` -> a [VArray] of
+   length [n] with every element defaulted to the null string (real
+   SNOBOL4's default when no initial value is given); `ARRAY(n, init)`
+   -> the same, but every element starts as [init] instead. `TABLE()`/
+   `TABLE(n)` -> an empty [VTable] ([n], if given, is only a starting
+   capacity hint for [Hashtbl.create] -- SNOBOL4 tables grow
+   unboundedly regardless). See the module comment above for why a bad
+   index later fails rather than crashes, and why table identity needs
+   no extra work here. *)
+let eval_data_constructor (_name : string) (_args : value list) : value =
+  failwith "TODO: week 10 -- implement ARRAY(...)/TABLE(...) (see the comment above)"
 
 (* A DEFINE'd function: its formal parameters, its local variables (reset
    to the null string on each call), and the label its body starts at
@@ -431,20 +435,17 @@ let rec eval_expr (e : expr) : value =
        if a bare string literal is one of them (e.g. `ANY('AB') | '1'`). *)
     VPattern (PAlt (to_pattern (eval_expr l), to_pattern (eval_expr r)))
   | Bind (e, name) -> VPattern (PBind (to_pattern (eval_expr e), name))
-  | Index (name, idx_e) ->
-    let container = lookup name in
-    let idx = eval_expr idx_e in
-    (match container with
-     | VArray arr ->
-       let i = to_int idx in
-       if i >= 1 && i <= Array.length arr then arr.(i - 1) else raise Fail_signal
-     | VTable tbl ->
-       (match Hashtbl.find_opt tbl idx with
-        | Some v -> v
-        | None -> raise Fail_signal)
-     | _ ->
-       failwith
-         (Printf.sprintf "cannot index a non-array/table value (variable %s)" name))
+  (* TODO(week 10): look up [name] in [env] via [lookup], evaluate
+     [idx_e], and dispatch on the container: a [VArray] reads element
+     [i] if [1 <= i <= Array.length arr] and otherwise [raise
+     Fail_signal] (out-of-bounds fails, per the module comment, rather
+     than crashing); a [VTable] does [Hashtbl.find_opt], returning the
+     value on [Some] and [raise Fail_signal] on [None] (a missing key
+     fails the same way). Any other container value is a host-language
+     type error -- [failwith], not [Fail_signal] -- exactly like using
+     a [VPattern] where a plain value was expected elsewhere in this
+     file. *)
+  | Index (_name, _idx_e) -> failwith "TODO: week 10 -- implement Index (A<I> read, see the comment above)"
   | Call (name, args) ->
     let arg_vals = List.map eval_expr args in
     if name = "DEFINE" then eval_define arg_vals
@@ -539,27 +540,17 @@ and exec_stmt (s : stmt) : outcome =
        assign name v;
        Success
      with Fail_signal -> Failure)
-  | IndexAssign (name, idx_e, obj_e) ->
-    (try
-       let container = lookup name in
-       let idx = eval_expr idx_e in
-       let v = eval_expr obj_e in
-       (match container with
-        | VArray arr ->
-          let i = to_int idx in
-          if i >= 1 && i <= Array.length arr then begin
-            arr.(i - 1) <- v;
-            Success
-          end
-          else Failure
-        | VTable tbl ->
-          Hashtbl.replace tbl idx v;
-          Success
-        | _ ->
-          failwith
-            (Printf.sprintf
-               "cannot index-assign into a non-array/table value (variable %s)" name))
-     with Fail_signal -> Failure)
+  (* TODO(week 10): the write-side counterpart to [eval_expr]'s [Index]
+     case above -- look up [name], evaluate [idx_e] and [obj_e], and
+     mutate the container in place: a [VArray] writes element [i] and
+     returns [Success] if in bounds, [Failure] (not an exception -- an
+     out-of-bounds write fails the statement, it doesn't crash it) if
+     not; a [VTable] does [Hashtbl.replace] unconditionally (tables
+     grow to fit any key) and returns [Success]. Wrap the whole thing
+     in a [try ... with Fail_signal -> Failure] the same way [Assign]
+     above does, since evaluating [idx_e]/[obj_e] can itself fail. *)
+  | IndexAssign (_name, _idx_e, _obj_e) ->
+    failwith "TODO: week 10 -- implement IndexAssign (A<I> = expr, see the comment above)"
   | Expr e ->
     (try
        ignore (eval_expr e);

@@ -23,36 +23,24 @@ let expect st t =
   let got = advance st in
   if got <> t then raise (Parse_error "unexpected token")
 
-let rec parse_primary st =
-  match advance st with
-  | INT n -> Int n
-  | LPAREN ->
-    let e = parse_expr st in
-    expect st RPAREN;
-    e
-  | _ -> raise (Parse_error "expected an expression")
+(* TODO(week 2): implement the precedence-climbing chain, highest
+   precedence to lowest:
 
-and parse_muldiv st =
-  let lhs = ref (parse_primary st) in
-  let continue_ = ref true in
-  while !continue_ do
-    match peek st with
-    | STAR -> ignore (advance st); lhs := Bin (Mul, !lhs, parse_primary st)
-    | SLASH -> ignore (advance st); lhs := Bin (Div, !lhs, parse_primary st)
-    | _ -> continue_ := false
-  done;
-  !lhs
+   - [parse_primary]: INT, or "( expr )" via [parse_expr].
+   - [parse_muldiv]: [parse_primary], then loop consuming STAR/SLASH,
+     each time folding in another [parse_primary] on the right.
+   - [parse_addsub]: [parse_muldiv], then loop consuming PLUS/MINUS,
+     each time folding in another [parse_muldiv] on the right.
+   - [parse_expr]: just [parse_addsub] -- this grammar has no level below
+     it yet (concatenation arrives in week 4). *)
+let rec parse_primary (_st : state) : expr =
+  failwith "TODO: parse_primary"
 
-and parse_addsub st =
-  let lhs = ref (parse_muldiv st) in
-  let continue_ = ref true in
-  while !continue_ do
-    match peek st with
-    | PLUS -> ignore (advance st); lhs := Bin (Add, !lhs, parse_muldiv st)
-    | MINUS -> ignore (advance st); lhs := Bin (Sub, !lhs, parse_muldiv st)
-    | _ -> continue_ := false
-  done;
-  !lhs
+and parse_muldiv (_st : state) : expr =
+  failwith "TODO: parse_muldiv"
+
+and parse_addsub (_st : state) : expr =
+  failwith "TODO: parse_addsub"
 
 and parse_expr st = parse_addsub st
 

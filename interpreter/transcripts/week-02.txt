@@ -1,0 +1,5 @@
+$ dune exec bin/main.exe -- examples/precedence.sno
+14
+20
+5
+2

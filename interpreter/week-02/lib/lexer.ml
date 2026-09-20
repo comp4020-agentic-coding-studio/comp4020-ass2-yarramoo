@@ -20,29 +20,9 @@ exception Lex_error of string
 let is_digit c = c >= '0' && c <= '9'
 let is_blank c = c = ' ' || c = '\t'
 
-let tokenize (line : string) : token list =
-  let n = String.length line in
-  let rec go i acc =
-    if i >= n then List.rev (EOF :: acc)
-    else
-      let c = line.[i] in
-      if is_blank c then go (i + 1) acc
-      else if is_digit c then begin
-        let j = ref i in
-        while !j < n && is_digit line.[!j] do
-          incr j
-        done;
-        let text = String.sub line i (!j - i) in
-        go !j (INT (int_of_string text) :: acc)
-      end
-      else
-        match c with
-        | '+' -> go (i + 1) (PLUS :: acc)
-        | '-' -> go (i + 1) (MINUS :: acc)
-        | '*' -> go (i + 1) (STAR :: acc)
-        | '/' -> go (i + 1) (SLASH :: acc)
-        | '(' -> go (i + 1) (LPAREN :: acc)
-        | ')' -> go (i + 1) (RPAREN :: acc)
-        | _ -> raise (Lex_error (Printf.sprintf "unexpected character %c" c))
-  in
-  go 0 []
+(* TODO(week 2): extend week 1's digit-only [tokenize] with '+', '-', '*',
+   '/', '(', and ')' as ordinary single-character tokens (no
+   blank-sensitivity yet -- see the module comment above). Keep the
+   digit-run scanning from week 1 unchanged. *)
+let tokenize (_line : string) : token list =
+  failwith "TODO: extend the lexer with arithmetic operators and parens"

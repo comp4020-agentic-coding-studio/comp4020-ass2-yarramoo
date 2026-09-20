@@ -7,7 +7,7 @@ let apply op a b =
   | Mul -> a * b
   | Div -> a / b
 
-let rec eval_expr (e : expr) : int =
-  match e with
-  | Int n -> n
-  | Bin (op, l, r) -> apply op (eval_expr l) (eval_expr r)
+(* TODO(week 2): recurse over the tree, applying [apply] at each [Bin]
+   node. *)
+let eval_expr (_e : expr) : int =
+  failwith "TODO: eval_expr"

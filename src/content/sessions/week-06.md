@@ -63,6 +63,34 @@ parallel execution path.
   call's. A bug in save/restore ordering usually shows up first as a
   recursive call silently clobbering its caller's locals.
 
+## Sample transcript
+
+Genuine captured output from this course's own checkpoint-2 reference
+solution, run against four example programs — including one built to
+fail on purpose:
+
+```text
+$ dune exec bin/main.exe -- examples/loop.sno
+1,2,3,4,5,DONE
+
+$ dune exec bin/main.exe -- examples/define.sno
+36
+49
+
+$ dune exec bin/main.exe -- examples/recursion.sno
+120
+
+$ dune exec bin/main.exe -- examples/fail.sno
+ARITHMETIC FAILED AS EXPECTED
+```
+
+`recursion.sno`'s `120` is a factorial computed entirely with `DEFINE` and
+the goto field — no loop construct exists in the language at this point,
+so that single number is the save/restore discipline working correctly
+several call frames deep. `fail.sno` is there to prove the negative case:
+a program whose whole point is to fail a predicate and print the
+`:F()`-branch message, not the success path.
+
 ## Afterwards
 
 Movement II ends here: statements, the goto field, and `DEFINE`d functions

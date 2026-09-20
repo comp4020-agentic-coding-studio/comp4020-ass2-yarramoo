@@ -64,6 +64,34 @@ information back out of a match that already succeeds.
   retry forever) and that it reports true non-overlapping occurrences, not
   the same one repeatedly.
 
+## Sample transcript
+
+Genuine captured output from this course's own checkpoint-3 reference
+solution — the fullest transcript of the three checkpoints, since it is
+the first one exercising conditional assignment and backtracking
+together:
+
+```text
+$ dune exec bin/main.exe -- examples/bind_replace.sno
+HELLO SNOBOL4
+HELLO, ALICE!
+CORRECTLY FAILED, LINE2 UNCHANGED = NAME: BOB
+
+$ dune exec bin/main.exe -- examples/primitives.sno
+LEN(5) MATCHED ALL OF HELLO
+LEN(6) CORRECTLY FAILED (ONLY 5 CHARS)
+SPAN CAPTURED LEADING WHITESPACE: [   ]
+NOTANY CORRECTLY FAILED ON AN ALL-DIGIT SUBJECT
+LETTERS=ABC DIGITS=123
+ARB CAPTURED VAL=42
+```
+
+`bind_replace.sno`'s third line is the one to check by hand before the
+session: a conditional assignment inside a match that goes on to fail
+overall must leave `LINE2` exactly as it was, not holding a stale capture
+from the attempt that failed — the same undo discipline this session's
+first studio task asks you to build and test directly.
+
 ## Afterwards
 
 Movement III is complete: patterns as values, a correctly-backtracking

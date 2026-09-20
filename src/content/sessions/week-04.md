@@ -42,6 +42,30 @@ Movement I needs.
   and a coerced number — and confirm each produces the value you expect by
   hand.
 
+## Sample transcript
+
+Genuine captured output from this course's own checkpoint-1 reference
+solution, run against three example programs — not a mockup:
+
+```text
+$ dune exec bin/main.exe -- examples/hello.sno
+HELLO, SNOBOL4!
+
+$ dune exec bin/main.exe -- examples/arith.sno
+14
+20
+3
+
+$ dune exec bin/main.exe -- examples/blanks.sno
+2
+5-3
+```
+
+`blanks.sno` is the one worth tracing by hand before the session: it is
+built specifically to show that a blank can mean concatenation in one
+position and nothing at all in another, depending on what's adjacent to
+it — the same blank-sensitivity week 2's lecture introduced.
+
 ## Afterwards
 
 Checkpoint 1 is due at the end of this week and asks you to complete a

@@ -1,0 +1,18 @@
+* Checkpoint 3: pattern concatenation (juxtaposition) and alternation
+* ("|"), searched unanchored -- the matcher tries every cursor position
+* left to right, not just position 0 (research/snobol/
+* 03-pattern-matching.md, "Unanchored pattern search").
+        S = 'THE CAT SAT ON THE MAT'
+        S 'CAT' | 'DOG'                            :F(NOTFOUND1)
+        OUTPUT = 'FOUND CAT OR DOG'                 :(TRY2)
+NOTFOUND1 OUTPUT = 'UNREACHABLE'
+TRY2    S 'DOG' | 'FISH'                            :S(SHOULDFAIL)
+        OUTPUT = 'CORRECTLY DID NOT FIND DOG OR FISH'  :(TRY3)
+SHOULDFAIL OUTPUT = 'UNREACHABLE'
+* Three-way concatenation: a literal, a primitive (ANY), another
+* literal -- matches the one place in S where an 'S' is immediately
+* followed by a vowel and then a 'T' ("SAT").
+TRY3    S 'S' ANY('AEIOU') 'T'                      :F(NOTFOUND3)
+        OUTPUT = 'FOUND CONSONANT-VOWEL-T PATTERN'  :(END)
+NOTFOUND3 OUTPUT = 'UNREACHABLE'
+END     N = N

@@ -1,0 +1,27 @@
+$ dune exec bin/main.exe -- examples/literal.sno
+FOUND SNOBOL4
+COBOL NOT FOUND, AS EXPECTED
+
+$ dune exec bin/main.exe -- examples/concat_alt.sno
+FOUND CAT OR DOG
+CORRECTLY DID NOT FIND DOG OR FISH
+FOUND CONSONANT-VOWEL-T PATTERN
+
+$ dune exec bin/main.exe -- examples/primitives.sno
+LEN(5) MATCHED ALL OF HELLO
+LEN(6) CORRECTLY FAILED (ONLY 5 CHARS)
+SPAN CAPTURED LEADING WHITESPACE: [   ]
+NOTANY CORRECTLY FAILED ON AN ALL-DIGIT SUBJECT
+LETTERS=ABC DIGITS=123
+ARB CAPTURED VAL=42
+
+$ dune exec bin/main.exe -- examples/bind_replace.sno
+HELLO SNOBOL4
+HELLO, ALICE!
+CORRECTLY FAILED, LINE2 UNCHANGED = NAME: BOB
+
+$ dune exec bin/main.exe -- examples/regression.sno
+2
+4
+6
+

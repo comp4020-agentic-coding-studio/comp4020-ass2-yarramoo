@@ -1,0 +1,7 @@
+$ dune exec bin/main.exe -- examples/count.sno
+1
+2
+3
+4
+5
+DONE

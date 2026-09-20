@@ -1,0 +1,10 @@
+* Week 5: a goto field and the LE predicate build a counting loop with
+* no if/while/for construct at all -- SNOBOL4's only branch primitive is
+* a statement's own success or failure (research/snobol/
+* 02-language-reference.md, "Statement structure"). A label starts in
+* column 1; every other line here is indented, per that same convention.
+        N = 1
+LOOP    OUTPUT = N
+        N = N + 1
+        LE(N,5)                :S(LOOP)
+        OUTPUT = 'DONE'

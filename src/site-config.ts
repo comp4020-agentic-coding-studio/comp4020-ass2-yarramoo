@@ -16,6 +16,7 @@ export const courseApiCollections = [
   ...graphCollections.map((key) => ({ key })),
   { key: "policies", dir: "pages/policies" },
   { key: "setup", dir: "pages/setup" },
+  { key: "ocaml-crash-course", dir: "pages/ocaml-crash-course" },
 ];
 
 export const siteConfig = defineSiteConfig({

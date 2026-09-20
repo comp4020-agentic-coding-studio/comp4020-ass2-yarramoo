@@ -4,246 +4,86 @@
 
 **Implementing SNOBOL4** (`SLOP6753`): a 12-week compiler-construction studio
 built around a single 1962 language and the backtracking pattern-matching
-engine that made it strange. The curriculum's structural idea is that four
-checkpoints hand students a real, partially-complete OCaml codebase (this
-week's new feature stubbed as `failwith "TODO"`, plus a genuine captured
-transcript of the finished behaviour), not an in-browser toy — so "done" is
-checkable against real output rather than a rubric's opinion.
+engine that made it strange. Four checkpoints hand students a real,
+partially-complete OCaml codebase (this week's feature stubbed as
+`failwith "TODO"`, plus a genuine transcript of the finished behaviour), not
+an in-browser toy — so "done" is checkable against real output.
 
 ## How I got here
 
-Before any of that, `research/` had to exist for real.
-[`776527f`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/776527f)
-scaffolded the corpus's own conventions and index — frontmatter shape, the
-`[Citekey]` format `research/README.md` resolves, and the rule that anything
-recalled rather than sourced gets prefixed `unverified:`. Filling it in was
-meant to be one large batch, all researched and cited before a single lecture
-page existed to depend on any of it: SNOBOL's history and language reference,
-its pattern-matching semantics, compiler-course pedagogy for how a 12-week
-course should stage itself, regex engine internals, and the case for OCaml
-over the alternatives.
 
-I dispatched that batch on Opus at max reasoning effort, with no limit set on
-how many subagents the dispatching task itself could spawn or what
-model/effort each of those ran at. The week's entire budget was gone in
-roughly 20 minutes. Most of the research had genuinely been done — real
-sources found, real citations assembled — but almost none of it had reached
-`research/` yet; the run died to the shared weekly budget cutoff mid-write,
-and a 429 doesn't hand you back a partial file, it hands you back nothing,
-unless something happened to land first.
 
-When the budget reset, the first job wasn't new research, it was salvage.
-[`f254329`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/f254329)
-recovers exactly one file,
-`research/compilers/01-pipeline-and-pedagogy.md`, straight out of the dead
-run's own subagent transcripts: that particular `Write` call had completed a
-beat before the 429 hit, so its 603 lines of already-cited pedagogy research
-— staging models from Cool, ChocoPy and IU's P523, Ghuloum's incremental-step
-compilers, and where SNOBOL4's own line-oriented grammar breaks the classical
-lexing-heavy staging most compiler courses assume — were sitting intact in
-the transcript, just never committed. Everything else that batch had touched
-had no equivalent surviving artifact and had to be redone properly, smaller
-and slower this time:
-[`f4ac719`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/f4ac719)
-(history, pattern matching, implementation internals, and the regex-engine
-research together), then, once the next reset allowed a further pass,
-[`9932af4`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/9932af4)
-(the language reference) and
-[`a2ad958`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/a2ad958)
-(the OCaml language-choice case).
+`research/` had to exist before any lecture could cite it
+([`776527f`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/776527f)).
+My first attempt dispatched the whole corpus as one unbounded
+Opus-max-effort batch, with no cap on subagent count or per-agent
+model/effort. The week's budget was gone in about 20 minutes, and almost
+none of that research had reached `research/` before the shared cutoff
+killed the run mid-write. Recovery meant reading the dead run's own
+subagent transcripts rather than treating the 429 as a total loss: one
+file's `Write` call had landed a beat early and was salvaged whole
+([`f254329`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/f254329));
+the rest was redone smaller and slower
+([`f4ac719`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/f4ac719),
+[`9932af4`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/9932af4),
+[`a2ad958`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/a2ad958)).
+An agent's tool calls are real state the instant they happen, independent of
+whether the dispatching task ever returns — this repo's push-after-batch
+rule doesn't help a run that dies before it writes anything.
 
-What stuck from this wasn't the recovery trick itself — it was what the trick
-implied. An agent's tool calls and context are real, durable state the moment
-they happen, independent of whether the task that dispatched it ever returns
-a result; a crashed run isn't a blank to redo from scratch by default, it's a
-transcript worth reading before assuming that. The failure also named a gap
-this repo's own harness didn't close on its own:
-[`c3c4ecf`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/c3c4ecf)'s
-push-after-batch rule assumes there's a finished batch to push once something
-completes — it does nothing for a dispatch that dies before any of its own
-writes land, which is exactly what happened here. Every research batch after
-this one ran smaller and more boundedly on purpose, not because the corpus
-got easier to write, but because one unlimited dispatch had just shown what
-it costs when it doesn't come back.
+Curriculum content then went in per movement, each its own commit so a bad
+batch was caught before the next built on it
+([`d82f1c4`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/d82f1c4),
+[`ec438e5`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/ec438e5),
+[`b2a7f95`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/b2a7f95),
+[`4adfb9f`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/4adfb9f))
+— every factual claim traces to a cited, non-`unverified:` source. The
+riskiest call was making the four checkpoints real, working `dune` projects
+rather than simulated
+([`8d315db...4f3a6f4`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/compare/8d315db...4f3a6f4)),
+verified by rerunning each `-solution` tag's examples against its committed
+transcript in a disposable worktree. Two gaps surfaced and were disclosed
+rather than hidden: checkpoint-1's commits predate this repo's attribution
+convention, and its starter zip landed a commit late.
 
-`research/` already committed this course to a SNOBOL4-in-OCaml compiler
-before any site content existed, so the first content work
-([`9ed5765`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/9ed5765))
-was identity: title, code, tags, and replacing the four starter placeholder
-images, which `check:evidence`'s SHA check gates on directly.
-
-Curriculum content went in movement by movement, each batch a separate
-commit, so a bad batch could be caught before the next one built on it:
-[`d82f1c4`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/d82f1c4)
-(Movement I),
-[`ec438e5`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/ec438e5)
-(Movement II),
-[`b2a7f95`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/b2a7f95)
-(Movement III), and
-[`4adfb9f`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/4adfb9f)
-(Movement IV). Every factual claim on a lecture page traces to a cited source
-in `research/`; nothing marked `unverified:` there made it onto a page as
-settled fact.
-
-The riskiest decision was making the four checkpoints genuinely-working OCaml,
-not simulated:
-[`8d315db...4f3a6f4`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/compare/8d315db...4f3a6f4)
-builds checkpoints 1–3 as real `dune` projects, tags each solution and its
-starter (the solution with the new feature stubbed back out) separately, and
-zips the starters for download. I verified this wasn't theatre by checking out
-each `-solution` tag in a disposable worktree and re-running its example
-programs against the committed transcript — trust the check, not my memory of
-having written it. Two process gaps surfaced and are worth naming rather than
-hiding: the checkpoint-1 commits
-([`8d315db`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/8d315db),
-[`ceecc51`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/ceecc51))
-predate this repo's attribution convention and carry no `Co-Authored-By`
-trailer; and the checkpoint-1 and checkpoint-2 starter zips were committed
-together in
-[`c2644cc`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/c2644cc)
-rather than each alongside its own starter tag, a one-commit lag caught and
-closed rather than left silent.
-
-The home page
-([`f681465`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/f681465))
-and its schedule table are built last, by design: they read the four
-movements and the full 12-week table straight out of the content collections
-at render time, so the table can't drift out of sync with the pages it links
-to. The three decks
+A later pass extended this to every teaching week, not just the four
+checkpoints, and turned up a real coherence bug: three pages claimed the
+reference implementation had all seven Movement III primitives, but
+`interpreter/README.md` said `ARBNO`/`BAL` had been dropped. Fixed as new
+commits on top of the already-graded checkpoint-3 tags
+([`04ce106`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/04ce106)),
+verified byte-identical on the five pre-existing examples. A second such
+gap — `week-01.md` told students to use `ocamllex`, but every shipped week
+uses a hand-rolled lexer instead, for SNOBOL4's blank-sensitivity rule — was
+corrected across all three pages that repeated it
+([`395cd58`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/395cd58)).
+Weeks 10 and 11 were genuinely new work (arrays/tables with real identity
+semantics; source-positioned diagnostics and one documented recovery
+strategy), each verified against its own transcript, before a `/setup/`
+page built from toolchain versions actually run in this environment and the
+three decks'
 ([`ab8f2c5`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/ab8f2c5))
-and the retro line-printer styling pass
-([`d7c8138`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/d7c8138))
-followed, each checked against `pnpm build`'s a11y, base-path-link, and
-astromotion structural checks before committing — a red check blocked the next
-step rather than getting silenced.
+background photos — real, Creative-Commons-licensed, credited in speaker
+notes —
+([`45a4d4b`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/45a4d4b))
+closed out the build.
 
-The last pass was verification, not new content: `pnpm build` (Astro's
-content check, the theme's a11y and base-path-link checks, the course-graph's
-`related:` validation, and astromotion's per-deck structural check) and the
-`spec/` suite all green before any of the above got pushed, and `pnpm
-check:evidence` closed out the remaining starter markers and this file's own
-template comment.
-
-A later pass built real, downloadable per-week starter/solution codebases for
-every teaching week, not just the four checkpoint boundaries. Scoping that
-turned up a third process gap, worth naming the same way as the two above:
-`week-08.md` and checkpoint 3's own session page both promise "all seven
-Movement III primitives," but `interpreter/README.md`'s scope-decisions
-section said `ARBNO` and `BAL` were attempted and dropped — three pages
-disagreeing about what the reference implementation actually did. Rather than
-rewrite the already-cited, already-graded `checkpoint-3-solution`/
-`checkpoint-3-starter` tags, the fix landed as new commits on top of them —
-[`04ce106`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/04ce106)
-adds `ARBNO`/`BAL` to checkpoint 3's solution (tagged
-`checkpoint-3-solution-v2`) and
-[`69e4c36`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/69e4c36)
-re-stubs the same TODOs the original starter had, plus the two new cases
-(tagged `checkpoint-3-starter-v2`) — so the old tags stay historically
-accurate to what shipped before the fix, while
-[`62954de`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/62954de)
-regenerates the zip students actually download from the v2 tag. `ARBNO` in
-this matcher needed no explicit retry loop the way `ARB` does — its own
-recursive definition, `NULL | p *ARBNO(p)`, is directly executable against
-this checkpoint's continuation-passing matcher — and I checked the fix was
-additive-only by re-running all five pre-existing examples and diffing their
-output against the transcript already committed from before the change:
-byte-identical. Week 8
-([`e4a9da9`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/e4a9da9))
-carries the same two primitives into its own, differently-shaped
-explicit-stack matcher, where `ARBNO` and `BAL` are instead rewritten in
-terms of the matcher's existing choice-point machinery — the same primitive,
-two genuinely different implementation strategies, each fitted to its own
-matcher's architecture rather than one copied onto the other.
-
-The last two weeks of that per-week build were the most expensive on
-purpose, since each genuinely extends the language rather than cutting an
-already-built feature down to size. Week 10
-([`8df84b9`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/8df84b9)
-solution,
-[`e897604`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/e897604)
-starter,
-[`875f652`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/875f652)
-zip) adds `ARRAY`/`TABLE` to the value type, routes out-of-bounds/missing-key
-lookups through the same failure mechanism as everything else rather than an
-OCaml exception, and turns on `-warn-error +8` — I confirmed table identity
-(not just equality) held by writing a program that mutates a stored value
-through one table reference and reads the mutation back through a second,
-independent lookup of the same key, since a copy-on-read implementation
-would pass a naive equality test and fail exactly this one. Week 11
-([`89c402a`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/89c402a)
-solution,
-[`7688c5f`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/7688c5f)
-starter,
-[`419c9f0`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/419c9f0)
-zip) threads source positions through the lexer and parser, turns syntax
-errors into located diagnostics (including a two-location one — an unmatched
-`(`, reported with both where it opened and where a `)` was expected but
-never found), and adds one documented recovery strategy: a malformed line's
-error is recorded and parsing continues, so a file with several mistakes
-reports all of them together instead of stopping at the first. `main.ml`
-still refuses to run any program with recorded errors, so recovery earns you
-a complete diagnostic report, not silent partial execution. Its starter
-needed a third stub shape, distinct from the whole-function and partial
-stubs checkpoint 3 already established — documented in
-`interpreter/README.md` — because a `failwith` stub on any of the three
-affected functions would have broken ordinary, already-working parsing, not
-just the new diagnostics. The differential-testing harness
-(`scripts/diff_test.sh`) is real and runnable, but this build environment has
-no CSNOBOL4 binary to compare against; rather than fabricate a disagreement
-or silently skip half of what the session page promises, the harness detects
-the missing binary, says so in its own output, and falls back to an honest
-crash-catching mode against this interpreter alone — the committed
-transcript (`interpreter/transcripts/week-11.txt`) shows exactly that
-degraded run, not an invented comparison.
-
-Scoping the week-11 work also surfaced a fourth process gap, wider than the
-first pass had assumed: `week-01.md` told students to build their week-1
-lexer with `ocamllex`, but the real, already-shipped `checkpoint-1` (and
-every checkpoint and week after it) uses a hand-rolled lexer instead,
-specifically because of the blank-sensitivity rule that same
-`ocamllex`-based approach can't express cleanly. The same false claim had
-also spread to `checkpoint-1.md`'s brief and `lectures/week-01.md`'s
-toolchain discussion — three pages, not the one originally scoped, all
-citing the same wrong fact — so all three were corrected together in
-[`395cd58`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/395cd58)
-rather than fixing the one and leaving the other two live. The 8
-non-checkpoint session pages then got their own real "Sample transcript"
-sections and starter-zip links in
-[`4b7c1e7`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/4b7c1e7),
-quoting each week's own genuinely-captured transcript verbatim, the same
-discipline the four checkpoint pages already held to.
-
-The last piece was the setup page week-01.md had been silently missing:
-a real `/setup/` page, built from the toolchain versions actually verified
-live in this build environment (`ocaml -version`, `dune --version`, `opam
---version`) rather than recalled from memory, documenting opam switch
-creation, the per-week download/build/run workflow `interpreter/README.md`
-already describes, and the same hand-rolled-lexer clarification the
-ocamllex disclosure above already fixed on three other pages. It's
-registered in `site-config.ts` the same way `policies/` already is (an
-entry in both `courseApiCollections` and `siteConfig.links`, since the home
-page's "Where to go next" `CardGrid` turned out not to be how this site's
-existing bare pages actually get linked in) and given its own `CardGrid`
-card besides; `week-01.md`'s "Before the session" section now links it in
-place of its old "install an OCaml toolchain" instruction with nothing to
-point at.
-
-The three decks (`ab8f2c5`) shipped with no imagery at all — a later pass
-added one background photo to each, real and licensed rather than invented
-or stock: week 1's Bell Labs slide gets an aerial photo of the Bell Labs
-Holmdel Complex (Lee Beaumont, CC BY-SA 2.0), week 7's explicit-stack slide
-gets a photo of an IBM System/360 punched program card deck, circa 1969
-(ArnoldReinhold, CC BY-SA 3.0), and week 12's S4D58 slide gets a photo of an
-IBM System/360 console (Erik Pitti, CC BY 2.0) — all three sourced from
-Wikimedia Commons, each credited by photographer and license in that
-slide's own speaker notes rather than as visible on-slide text. A Griswold
-portrait was the first thing looked for, for week 1's origin-story slide;
-none turned up on Wikimedia Commons under that search, and rather than
-substitute an unrelated image or a stock photo, that slide simply has no
-portrait. Adding the first credit line as visible on-slide text (week 7's
-slide already carried three paragraphs) overflowed astromotion's fixed
-1280×720 canvas — caught by an `agent-browser` screenshot, not by `pnpm
-check`, which stayed green throughout since astromotion's own structural
-check doesn't measure rendered height. Fixed by moving all three credit
-lines into each slide's speaker notes instead, then re-verified all three
-slides by screenshot after rebuilding.
+A later addition, `/ocaml-crash-course/`, exists because week 1's own "one
+variant type, one constructor per SNOBOL type" pitch is a big ask of anyone
+meeting `let rec`, pattern matching, and variants for the first time in
+week 1 itself. Not a general tutorial — every snippet is real, pulled with
+`git show <tag>:<path>` from this course's own solution tags rather than
+recalled from memory: week 1's `lexer.ml`, checkpoint 2's `value`/`goto`
+types, checkpoint 3's recursive `pattern` type, week 10's `-warn-error +8`.
+Its two manual citations name a verified section title rather than a
+chapter number, after fetching the manual's own contents page showed
+"Patterns" and "Type and exception definitions" as unnumbered subsections,
+not independently numbered chapters — a specific chapter number would have
+been invented, not sourced. Registered in `courseApiCollections` but,
+unlike `setup/`, deliberately given no `siteConfig.links` entry or
+home-page card: the brief asked for it "in the setup, or linked from the
+first lecture," which reads as a contextual pointer rather than a nav
+destination, and a fifth card would have broken the home page's existing
+2×2 grid. Linked inline instead, from `setup/`'s opening paragraph and from
+both of week 1's own pages (lecture and session) — the two places someone
+would actually be standing when they need it.

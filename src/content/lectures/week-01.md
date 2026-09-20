@@ -111,6 +111,11 @@ library support it happens to ship:
   interpreter in a language with pattern matching and sum types built in, and
   it is most of why the fit was chosen before any code was written.
 
+If none of `let rec`, pattern matching, or variant types are familiar yet,
+the [OCaml crash course](/ocaml-crash-course/) covers exactly these three
+things — and only these — against real code from this course's own
+interpreter, before you meet them here for real.
+
 This is not a novel pairing. Andrew Appel's *Modern Compiler Implementation
 in ML* structures an entire course this way — build a complete compiler in
 an ML-family language, using its pattern matching and datatypes throughout —

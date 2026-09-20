@@ -26,6 +26,11 @@ never set one up before, budget real time for this — a broken toolchain on
 day one costs you every week after it, and it is much cheaper to fix before
 the course needs it for anything.
 
+If you've never written OCaml before, the
+[OCaml crash course](/ocaml-crash-course/) is a short, scoped-down read —
+`let`, pattern matching, and variant types, the three things this week's
+lexer actually uses, with real code from it.
+
 Skim the lecture's naming-dispute aside again before you arrive. You will be
 asked, briefly, which account you'd trust and why.
 

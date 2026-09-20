@@ -1,0 +1,230 @@
+---
+title: OCaml crash course
+description:
+  The handful of OCaml features this course's own interpreter leans on
+  hardest, for anyone who hasn't written OCaml before.
+---
+
+This is not a general OCaml tutorial — there's a good one linked at the
+bottom. It's scoped tightly to the features `interpreter/` actually uses,
+week by week, so you can read it once before week 1 and recognise every
+piece of it in real course code afterward. For toolchain install and the
+`dune build`/`dune exec` workflow, see [Setup](/setup/) instead; this page
+is about the language, not the tools.
+
+## `let`, and functions
+
+`let` binds a name to a value. A function is a value like any other — this
+is week 1's actual character-class helpers, from
+`interpreter/week-01/lib/lexer.ml`:
+
+```ocaml
+let is_digit c = c >= '0' && c <= '9'
+let is_blank c = c = ' ' || c = '\t'
+```
+
+Nothing here is special-cased for functions: `is_digit` is a `let` binding
+whose value happens to be a function from `char` to `bool`. A function of
+several arguments is really a chain of one-argument functions — calling
+`is_digit` with too few arguments doesn't error, it just gives you back
+another function waiting for the rest.
+
+Recursive functions need `let rec`, not plain `let` — a plain `let` can't
+refer to itself while it's still being defined:
+
+```ocaml
+let rec go i acc =
+  if i >= n then List.rev (EOF :: acc)
+  else (* ... recurse with go (i + 1) ... *)
+```
+
+(from week 1's solution `tokenize`, which walks the input string one
+character at a time, recursively, rather than with a loop).
+
+## Pattern matching, and why the compiler checks it for you
+
+`match` is the language's `switch`, but it also *destructures* — pattern
+matching means describing a value's shape and binding pieces of it in the
+same step. This is the whole visible body of week 1's `show_token`:
+
+```ocaml
+let show_token = function
+  | INT n -> Printf.sprintf "INT %d" n
+  | EOF -> "EOF"
+```
+
+`| INT n -> ...` matches any value built with the `INT` constructor and
+binds its payload to `n` for the right-hand side to use. `function` here
+is shorthand for `fun x -> match x with ...`.
+
+The important part for this course: if you add a new case to a variant
+type and forget to handle it in some `match`, OCaml's compiler warns you —
+`warning 8, this match case is not exhaustive`. From week 10 onward this
+course promotes that warning to a hard build error
+(`interpreter/week-10/lib/dune`: `(flags (:standard -warn-error +8))`),
+specifically because week 10 widens the value type with two new
+constructors and the point is to force every existing `match` over a value
+to be revisited — a forgotten case becomes a compile failure, not a
+runtime crash discovered later. See the OCaml manual's
+["Patterns" section](https://ocaml.org/manual/5.4/patterns.html) for the
+full grammar; this course never needs more than the constructor patterns
+shown here.
+
+## Variant types: one constructor per case
+
+A variant type lists its possible shapes, each tagged by a constructor
+name. Week 1's entire token vocabulary is two constructors:
+
+```ocaml
+type token =
+  | INT of int
+  | EOF
+```
+
+A `token` value is *either* an `INT` carrying an `int`, *or* `EOF` carrying
+nothing — never both, never something else. This is the idea
+[week 1's lecture](/lectures/week-01/) calls "every SNOBOL4 value is
+dynamically tagged": the real interpreter's value type is exactly this
+pattern, growing one constructor at a time as the language grows. By
+checkpoint 2 it's:
+
+```ocaml
+type value = VInt of int | VStr of string
+```
+
+By checkpoint 3, patterns become a value in their own right:
+
+```ocaml
+type value = VInt of int | VStr of string | VPattern of pattern
+```
+
+and by week 10, arrays and tables:
+
+```ocaml
+type value =
+  | VInt of int
+  | VStr of string
+  | VPattern of pattern
+  | VArray of value array
+  | VTable of (value, value) Hashtbl.t
+```
+
+Same type, same shape of definition, one more tag added at a time — never
+rewritten from scratch. See the manual's
+["Type and exception definitions" section](https://ocaml.org/manual/5.4/typedecl.html)
+for the full syntax.
+
+## Records: a fixed set of named fields
+
+Where a variant type is "exactly one of these shapes," a record type is
+"exactly all of these fields, together." Checkpoint 2's goto field
+(`:S(label)`, `:F(label)`, `:(label)`) is a record:
+
+```ocaml
+type goto = {
+  on_success : string option;
+  on_failure : string option;
+  unconditional : string option;
+}
+```
+
+Field access is `.` (`g.on_success`), and building one is
+`{ on_success = None; on_failure = Some "DONE"; unconditional = None }`.
+
+## Variants can be recursive
+
+A variant's constructor arguments can be the same type — this is how a
+pattern *of* patterns gets built at all. Checkpoint 3's pattern type:
+
+```ocaml
+type pattern =
+  | PLit of string
+  | PAny of string
+  | PArb
+  | PArbno of pattern
+  | PConcat of pattern * pattern
+  | PAlt of pattern * pattern
+```
+
+`PConcat (PLit "AB", PArb)` is a `pattern` built out of two smaller
+`pattern`s — exactly the "concatenation and alternation of patterns" week
+7's lecture describes, represented as ordinary recursive data rather than
+as text to re-parse every time. Matching over a recursive variant is
+naturally a recursive function, one case per constructor — this is most of
+how the real backtracking matcher in `interpreter/checkpoint-3/lib/eval.ml`
+is shaped, if you want to see the full version once you've met the
+pattern type in week 7.
+
+## `option`, for "there might not be a value here"
+
+`Hashtbl.find_opt` doesn't raise an exception when a key is missing — it
+returns an `option`:
+
+```ocaml
+match Hashtbl.find_opt env name with
+| Some v -> v
+| None -> VStr ""
+```
+
+`'a option = None | Some of 'a` is itself just an ordinary two-constructor
+variant, defined in the standard library rather than by you — see the
+manual's [`Option` module docs](https://ocaml.org/manual/5.4/api/Option.html).
+Week 10's table lookups use exactly this pattern to give a missing key its
+own explicit case, rather than an exception a caller has to remember to
+catch.
+
+## Exceptions, used deliberately, for control flow that unwinds
+
+OCaml exceptions aren't just for errors — checkpoint 2 uses them for
+`RETURN`/`FRETURN`:
+
+```ocaml
+exception Stmt_return
+exception Stmt_freturn
+```
+
+Calling a user-defined SNOBOL4 function is, underneath, an ordinary
+recursive OCaml function call. `RETURN` needs to unwind back to whichever
+call is *currently* running — including a recursive call several frames
+deep — and `raise Stmt_return` reaching the nearest enclosing handler does
+exactly that for free, because "nearest enclosing handler" and "most
+recently entered, still-active call" are the same frame. This course's
+own `Fail_signal` exception plays the same role for SNOBOL4's success/
+failure signal.
+
+## Running any week's code
+
+Every week and checkpoint is a standalone `dune` project with the same
+two-directory shape:
+
+```
+week-0N/
+  bin/main.ml     the entry point — reads argv, drives lib/
+  lib/            the actual lexer/parser/evaluator code
+  examples/       small .sno programs to run it against
+```
+
+```
+cd week-0N
+dune build
+dune exec bin/main.exe -- examples/some-file.sno
+```
+
+[Setup](/setup/) has the toolchain you need for this to work, and
+`interpreter/README.md` (in the course repository) documents the full
+week-by-week layout and the starter-stub conventions you'll meet when a
+week's starter has something left for you to fill in.
+
+## Further reading
+
+- ["Patterns."](https://ocaml.org/manual/5.4/patterns.html) The OCaml
+  System Manual — the full pattern grammar; this course only ever needs
+  constructor patterns and the wildcard `_`.
+- ["Type and exception definitions."](https://ocaml.org/manual/5.4/typedecl.html)
+  The OCaml System Manual — variant types, record types, and exception
+  declarations, in full.
+- [`Option`, standard library API reference.](https://ocaml.org/manual/5.4/api/Option.html)
+- Appel, Andrew W. (1998). *Modern Compiler Implementation in ML*. Cambridge
+  University Press — already cited on
+  [week 1's lecture page](/lectures/week-01/); builds an entire compiler
+  the same way this course does, using exactly these features throughout.

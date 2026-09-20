@@ -50,6 +50,42 @@ Two conventions to hold to when adding or using it:
   A page that states something the corpus only guessed at is worse than a page
   that stays vague.
 
+## A dispatch needs a cap before it needs ambition
+
+Agent work here runs against a fixed weekly dollar budget the course proxy
+enforces; `/comp4020:balance` is the authoritative reading of it. A fan-out with
+no stated limits will spend all of it without pausing to ask.
+
+Not hypothetical. One research dispatch in this repo ran 23 subagents on Opus at
+maximum effort, with no cap on spawning and no per-agent model or effort setting.
+The week's entire allocation was gone in about twenty minutes, and because almost
+nothing had reached `research/` yet, the run's output survived only inside the
+agent transcripts and had to be triaged and recovered by hand afterwards.
+
+- **Put the limits in the prompt.** How many subagents, which model, what
+  reasoning effort. An agent told none of this inherits the dispatching session's
+  settings --- which is how an ordinary task acquires an extraordinary price.
+- **Make them write as they go.** A subagent reporting findings back through the
+  orchestrator loses all of them if the run dies; one that writes each file as it
+  finishes keeps whatever it finished. This is the push-after-batch rule above,
+  one level down --- and note that rule protects nothing in a run that dies
+  before anything reaches disk.
+- **Read the balance before a large fan-out**, not after it.
+- **A partial run is not an empty one.** Tool calls are real state the instant
+  they happen. Before redoing lost work, read the dead run's transcripts under
+  `~/.claude/projects/<project>/<session>/subagents/` and triage what is already
+  finished, nearly finished, or genuinely gone.
+
+## PROCESS.md has a length, and `check` now knows it
+
+The assessment page gives 400--600 words for an assignment's PROCESS.md, and
+says work that badly overshoots can lose marks for concision. `check:evidence`
+enforces the band, because nothing did before and the file quietly reached
+~2,000 words: every batch of work appends its own disclosure paragraph in house
+style and nothing ever trims what came before. So when you add a paragraph,
+condense an older one in the same commit. Never fix an overshoot by deleting a
+disclosed gap --- the disclosure is the whole point of the file.
+
 ## Never `toEqual` a large structure
 
 `expect(a).toEqual(b)` on large arrays/objects walks them element by element

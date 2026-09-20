@@ -50,6 +50,31 @@ export function expectedReflections(repo: string): string[] | null {
 }
 
 // --- course-site only (approved divergence: the Assignment 2 gate) ---
+// The assessment page gives an indicative length for each deliverable's
+// PROCESS.md, and "work that badly overshoots can lose marks" under its
+// concision criterion. Nothing else here notices length, which is how this
+// file reached ~2,000 words: every batch of work appends its own disclosure
+// paragraph in house style and nothing ever trims what came before, so it
+// grows monotonically until someone counts. Counting is cheap; do it.
+export function prosewords(src: string): number {
+  const text = src
+    .replace(/```[\s\S]*?```/g, " ")       // fenced code
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")  // images: excluded by the brief
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1") // links: keep the text, drop the URL
+    .replace(/^[\s>*+-]+/gm, " ")            // list bullets, blockquote marks
+    .replace(/[#*_`|]/g, " ")
+    .replace(/\s[—–-]+\s/g, " ");             // standalone dashes aren't words
+  return text.split(/\s+/).filter(Boolean).length;
+}
+
+// Bounds are per deliverable. Only the ones this harness can identify from the
+// repo name are enforced; anything else is left alone rather than guessed at.
+export function expectedWords(repo: string): [number, number] | null {
+  if (/^comp4020-ass\d+-/.test(repo)) return [400, 600];
+  if (/^comp4020-crit\d+-/.test(repo)) return [150, 300];
+  return null;
+}
+
 function sha256(path: string): string {
   return createHash("sha256").update(readFileSync(path)).digest("hex");
 }
@@ -175,8 +200,23 @@ function main(): void {
   // at PROCESS.md on GitHub, unlike a citation whose SHA doesn't resolve,
   // which looks perfectly fine rendered.
 
+  const bounds = repo ? expectedWords(repo) : null;
+  const words = prosewords(src);
+  if (bounds) {
+    const [lo, hi] = bounds;
+    if (words < lo || words > hi) {
+      fail(
+        `PROCESS.md is ${words} words — the assessment page asks for ${lo}-${hi}. ` +
+          (words > hi
+            ? "Condense; don't drop a disclosure, since the disclosure is the point."
+            : "There's room to say more about how this got built."),
+      );
+    }
+  }
+
   if (failed) process.exit(1);
   console.log(`✓ PROCESS.md: ${shas.size} cited commit(s) all resolve`);
+  if (bounds) console.log(`✓ PROCESS.md: ${words} words, within ${bounds[0]}-${bounds[1]}`);
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

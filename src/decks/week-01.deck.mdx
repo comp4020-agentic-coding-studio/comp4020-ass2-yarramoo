@@ -201,8 +201,10 @@ pattern matching and sum types built in.
 
 A toy calculator: read an integer literal, evaluate it.
 
-`ocamllex` for lexing. A hand-built or generator-built parser for the
-rest, whichever a given week's grammar calls for.
+A hand-rolled lexer — not `ocamllex` — because SNOBOL4's blank-sensitive
+operators need an explicit scan, not a generated automaton's regex rules.
+A hand-built or generator-built parser for the rest, whichever a given
+week's grammar calls for.
 
 ```notes
 Studio starts now. The lecture page's "Further reading" has full

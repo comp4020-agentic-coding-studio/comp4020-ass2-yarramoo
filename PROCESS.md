@@ -37,19 +37,22 @@ other file carries `high`, which is that triage left visible. Not all of it came
 `regex/03-snobol-patterns-vs-regex.md` that does not exist. One of the regex
 researchers had flagged early that SNOBOL4's approach genuinely wasn't regex,
 and asked whether the curriculum wanted an explicit comparison of the two; in
-salvage mode I cut it — for budget reasons on top of the relevance ones.
+salvage mode I cut it — for budget reasons on top of relevance ones.
 
 Curriculum went in per movement, each its own commit so a bad batch was caught
 before the next built on it
-([`d82f1c4...4adfb9f`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/compare/d82f1c4...4adfb9f)) — every factual claim
-traced to a cited, non-`unverified:` source. What that missed was the page whose
-claim is simply untrue of the code beside it, which renders perfectly and so
-passes everything: seven promised pattern primitives against an implementation
-missing two, and an `ocamllex` instruction every shipped week contradicts.
-Fixing the prose took two passes, so both are checks now
-([`c8062bd`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/c8062bd)).
+([`d82f1c4...4adfb9f`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/compare/d82f1c4...4adfb9f)), every factual claim
+traced to a cited, non-`unverified:` source. What none of that catches is a
+page whose claim is simply untrue of the code beside it: it renders perfectly
+and passes every check I had. Two got through — seven promised pattern
+primitives against an implementation missing two, and an `ocamllex` instruction
+every shipped week contradicts. I fixed both by editing prose, which fixes the
+instance and not the class, and the `ocamllex` edit proved the point by needing
+a second pass 54 minutes later to catch a deck the first had missed. Both are
+tests now ([`c8062bd`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/c8062bd)).
 
-The rest of those harness rules are new, and writing this account is what
-produced them — the reflection came first, the commit followed ([`c06e16b`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/c06e16b)). Dispatches now state their subagent cap and
-per-agent model and effort in the prompt instead of inheriting the
-session's, and `check:evidence` now counts this file's own words, since nothing did when it quietly reached two thousand.
+Two more harness rules are new, and writing this account is what produced them
+— the reflection came first, the commit followed ([`c06e16b`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/c06e16b)).
+Dispatches now state their subagent cap and per-agent model and effort in the
+prompt instead of inheriting the session's, and `check:evidence` counts this
+file's own words, since nothing did when it quietly reached two thousand.

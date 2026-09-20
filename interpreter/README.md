@@ -66,6 +66,19 @@ For each checkpoint `N`:
   against its own example programs, output captured verbatim, not
   hand-written -- lives at `interpreter/transcripts/checkpoint-N.txt`.
 
+Checkpoint 3's starter departs from the whole-function-stub style above
+in two spots, deliberately: `parse_bind` (postfix `.`) and `parse_alt`
+(infix `|`) both sit *inside* a precedence chain inherited unchanged
+from checkpoint 2, so a whole-function `failwith` there would also break
+ordinary arithmetic and concatenation, which never touch the new
+tokens. Instead each falls through to the next-tighter precedence level
+normally and raises `failwith "TODO: ..."` only when it actually sees a
+`DOT`/`PIPE` token -- a "partial" stub rather than a whole-function one.
+Everything else stubbed in checkpoint 3 (`parse_body`'s pattern branch,
+and `to_pattern`/`eval_pattern_primitive`/`match_pat`/`find_match`/
+`exec_stmt`'s `Match` case in `eval.ml`) uses the ordinary whole-function
+style described above.
+
 To see exactly what's stubbed out in a given starter, diff it against its
 own solution tag, e.g.:
 

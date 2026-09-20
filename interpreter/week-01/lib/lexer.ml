@@ -22,28 +22,15 @@ exception Lex_error of string
 let is_digit c = c >= '0' && c <= '9'
 let is_blank c = c = ' ' || c = '\t'
 
-(* Tokenize a single logical line into a token list, terminated by EOF.
+(* TODO(week 1): implement [tokenize].
+   Tokenize a single logical line into a token list, terminated by EOF.
    This week's whole vocabulary is "a run of digits" -- no identifiers, no
-   operators, no strings yet. Blanks between digit runs are skipped, not
-   treated as concatenation (that rule doesn't exist until week 4). *)
-let tokenize (line : string) : token list =
-  let n = String.length line in
-  let rec go i acc =
-    if i >= n then List.rev (EOF :: acc)
-    else
-      let c = line.[i] in
-      if is_blank c then go (i + 1) acc
-      else if is_digit c then begin
-        let j = ref i in
-        while !j < n && is_digit line.[!j] do
-          incr j
-        done;
-        let text = String.sub line i (!j - i) in
-        go !j (INT (int_of_string text) :: acc)
-      end
-      else raise (Lex_error (Printf.sprintf "unexpected character %c" c))
-  in
-  go 0 []
+   operators, no strings yet. Skip blanks between digit runs (don't treat
+   them as concatenation -- that rule doesn't exist until week 4); scan a
+   maximal run of [is_digit] characters into an [INT]; anything else is a
+   [Lex_error]. *)
+let tokenize (_line : string) : token list =
+  failwith "TODO: implement the lexer (see the comment above tokenize)"
 
 let show_token = function
   | INT n -> Printf.sprintf "INT %d" n

@@ -147,12 +147,22 @@ code where it matters.
   exact reasoning, cited against research/snobol/02-language-reference.md's
   own `(TENS UNITS) 30` example.
 - **Pattern primitives implemented: `LEN`, `ANY`, `NOTANY`, `SPAN`,
-  `BREAK`, `ARB`, plus concatenation and `|` alternation, plus `.`
-  (conditional/immediate binding).** `ARBNO`, `BAL`, `POS`/`RPOS`,
-  `TAB`/`RTAB`, `REM`, `FENCE`, `ABORT`, `FAIL`, `SUCCEED`, the quickscan/
-  fullscan heuristics, and `$` (deferred assignment) are all out of scope.
-  `$` in particular was attempted and dropped -- see checkpoint 3's notes
-  below for why.
+  `BREAK`, `ARB`, `ARBNO`, `BAL`, plus concatenation and `|` alternation,
+  plus `.` (conditional/immediate binding).** `ARBNO` and `BAL` landed as
+  a disclosed fix on top of checkpoint 3's original solution/starter,
+  tagged `checkpoint-3-solution-v2`/`checkpoint-3-starter-v2` (see
+  `PROCESS.md`) -- the original `checkpoint-3-solution` and
+  `checkpoint-3-starter` tags are left untouched as historically accurate
+  snapshots of what shipped before the fix, but
+  `public/downloads/checkpoint-3-starter.zip` -- the file actually served
+  to students -- was regenerated from the v2 tag. The original checkpoint
+  shipped without `ARBNO`/`BAL`, which briefly left this README's own
+  scope notes out of step with what `week-08.md` and checkpoint 3's
+  session page both
+  promised ("all seven Movement III primitives"). `POS`/`RPOS`, `TAB`/`RTAB`, `REM`, `FENCE`,
+  `ABORT`, `FAIL`, `SUCCEED`, the quickscan/fullscan heuristics, and `$`
+  (deferred assignment) are all still out of scope. `$` in particular was
+  attempted and dropped -- see checkpoint 3's notes below for why.
 - **`DEFINE`/`RETURN`/`FRETURN` only; no `NRETURN`.** Function calls
   cannot appear as assignment targets in this subset.
 - **Function-call syntax is always `IDENT(args)`, regardless of

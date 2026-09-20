@@ -69,3 +69,34 @@ content check, the theme's a11y and base-path-link checks, the course-graph's
 `spec/` suite all green before any of the above got pushed, and `pnpm
 check:evidence` closed out the remaining starter markers and this file's own
 template comment.
+
+A later pass built real, downloadable per-week starter/solution codebases for
+every teaching week, not just the four checkpoint boundaries. Scoping that
+turned up a third process gap, worth naming the same way as the two above:
+`week-08.md` and checkpoint 3's own session page both promise "all seven
+Movement III primitives," but `interpreter/README.md`'s scope-decisions
+section said `ARBNO` and `BAL` were attempted and dropped — three pages
+disagreeing about what the reference implementation actually did. Rather than
+rewrite the already-cited, already-graded `checkpoint-3-solution`/
+`checkpoint-3-starter` tags, the fix landed as new commits on top of them —
+[`04ce106`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/04ce106)
+adds `ARBNO`/`BAL` to checkpoint 3's solution (tagged
+`checkpoint-3-solution-v2`) and
+[`69e4c36`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/69e4c36)
+re-stubs the same TODOs the original starter had, plus the two new cases
+(tagged `checkpoint-3-starter-v2`) — so the old tags stay historically
+accurate to what shipped before the fix, while
+[`62954de`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/62954de)
+regenerates the zip students actually download from the v2 tag. `ARBNO` in
+this matcher needed no explicit retry loop the way `ARB` does — its own
+recursive definition, `NULL | p *ARBNO(p)`, is directly executable against
+this checkpoint's continuation-passing matcher — and I checked the fix was
+additive-only by re-running all five pre-existing examples and diffing their
+output against the transcript already committed from before the change:
+byte-identical. Week 8
+([`e4a9da9`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/e4a9da9))
+carries the same two primitives into its own, differently-shaped
+explicit-stack matcher, where `ARBNO` and `BAL` are instead rewritten in
+terms of the matcher's existing choice-point machinery — the same primitive,
+two genuinely different implementation strategies, each fitted to its own
+matcher's architecture rather than one copied onto the other.

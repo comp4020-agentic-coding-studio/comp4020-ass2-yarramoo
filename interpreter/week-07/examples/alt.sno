@@ -1,0 +1,13 @@
+* Week 7: an unanchored 'A' | 'B' pattern is tried at every position in
+* turn; at each one, both alternatives are tried before the cursor moves
+* on at all (research/snobol/03-pattern-matching.md, "Pattern
+* construction operators" and "matching is inherently unanchored"). Run
+* with --trace to watch the history list record the untried alternative
+* at each position and resume it before the cursor advances -- the match
+* found is the earliest position where *either* alternative succeeds,
+* even though 'A' occurs later in the subject than 'B' does.
+        SUBJECT = 'ZZBA'
+        SUBJECT 'A' | 'B'      :F(NOMATCH)
+        OUTPUT = 'MATCHED'     :(STOP)
+NOMATCH OUTPUT = 'NO MATCH'
+STOP    SUBJECT = SUBJECT

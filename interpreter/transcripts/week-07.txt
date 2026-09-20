@@ -1,0 +1,26 @@
+$ dune exec bin/main.exe -- examples/alt.sno
+MATCHED
+
+$ dune exec bin/main.exe -- examples/alt.sno --trace
+matching against "ZZBA"
+  trying match at position 0
+    at 0: trying first alternative, recording second on the history list
+    "A" fails at 0
+    backtrack: resuming recorded alternative at 0
+    "B" fails at 0
+  trying match at position 1
+    at 1: trying first alternative, recording second on the history list
+    "A" fails at 1
+    backtrack: resuming recorded alternative at 1
+    "B" fails at 1
+  trying match at position 2
+    at 2: trying first alternative, recording second on the history list
+    "A" fails at 2
+    backtrack: resuming recorded alternative at 2
+    "B" matches at 2
+    matched, cursor now at 3
+MATCHED
+
+$ dune exec bin/main.exe -- examples/define_match.sno
+NO
+YES

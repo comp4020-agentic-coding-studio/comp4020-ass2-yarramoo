@@ -1,0 +1,12 @@
+* Week 7: checkpoint 2's full statement executor -- labels, goto field,
+* DEFINE/RETURN call frames -- keeps working unchanged alongside the new
+* pattern sublanguage. HASVOWEL(W) matches W against an alternation of
+* the five vowels and returns through a genuine RETURN/goto call frame,
+* not a simplified stand-in.
+        DEFINE('HASVOWEL(W)')
+        OUTPUT = HASVOWEL('SKY')
+        OUTPUT = HASVOWEL('CAT')
+END     N = N
+HASVOWEL   W 'A' | 'E' | 'I' | 'O' | 'U'      :S(YES)
+        HASVOWEL = 'NO'                        :(RETURN)
+YES     HASVOWEL = 'YES'                       :(RETURN)

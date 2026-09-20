@@ -10,8 +10,10 @@ teachers:
 spec:
   - your evaluator has a symbol table mapping names to values, built once,
     consulted at run time, with no lexical scoping
-  - assignment statements (subject blank object, no = token) update the
-    symbol table
+  - assignment statements (`subject = object`) update the symbol table —
+    this course's subset keeps the classic `=` surface form rather than
+    real SNOBOL4's blank-only notation, a deliberate simplification
+    documented in `interpreter/README.md`
   - looking up a name that has never been assigned returns the null string
     rather than an error
 related:
@@ -32,12 +34,16 @@ grammar with variable references and adds the first statement form.
   scope-chain-shaped. That impulse is exactly the mainstream-language
   intuition this week's lecture asks you to set aside; a flat table is not a
   shortcut here, it's the correct model.
-- **Implement assignment.** `subject` blank `object`, no `=` token, updates
-  the subject's cell in the symbol table to the object's evaluated value. A
-  reference to a variable that has never been assigned should evaluate to
-  the null string rather than raising an error — decide now how your `value`
-  type represents that, since it's the same question week 4's strings answer
-  more fully.
+- **Implement assignment.** `subject = object` updates the subject's cell in
+  the symbol table to the object's evaluated value. Real SNOBOL4 has no `=`
+  token at all — plain assignment is just `subject` blank `object`, with `=`
+  reserved for a replacement statement's object field — but this course's
+  subset keeps `=` throughout, matching checkpoint 1's already-established
+  surface syntax rather than introducing a second assignment notation this
+  late. A reference to a variable that has never been assigned should
+  evaluate to the null string rather than raising an error — decide now how
+  your `value` type represents that, since it's the same question week 4's
+  strings answer more fully.
 - **Check it end to end.** A short sequence of assignments and expressions
   referencing earlier ones (`X = 5`, `Y = X * 2 + 1`) should evaluate
   correctly in order.

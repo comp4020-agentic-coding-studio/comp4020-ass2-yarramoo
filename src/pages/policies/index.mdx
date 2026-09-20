@@ -7,8 +7,53 @@ description:
 
 # Policies and support
 
-{/* STARTER_CONTENT: replace this policy page, then remove this comment. */}
+## Late work
 
-Replace this page. Course-wide rules live here so an assessment brief can link
-to one place; a course with no rules worth a page can delete it, along with its
-entry in `src/site-config.ts`.
+Each checkpoint and the final project has a fixed due date, shown on its
+[assessment page](/assessments/). Work submitted after the deadline loses 5%
+of the available weight per day late, up to five days, after which it is
+marked at zero. There is no penalty-free grace window — a checkpoint that
+builds on the previous one's working code is not useful to mark out of order,
+so the schedule is designed around the due dates holding, not around students
+guessing how much slack exists.
+
+## Extensions
+
+Extensions are granted for documented illness or misadventure, requested
+before the deadline where at all possible. Ask your tutor directly rather than
+waiting for a lecture; a short email is enough to start the conversation.
+Extensions on Checkpoint 3 are considered more carefully than the others,
+because the final project starts from Checkpoint 3's codebase — a late
+Checkpoint 3 compresses the final project's timeline too, and that's worth
+discussing explicitly rather than discovering in week 12.
+
+## Academic integrity, and the CSNOBOL4 convention
+
+The interpreter you submit at each checkpoint has to be your own work: your
+own lexer, your own parser, your own evaluator, written to the brief. That
+does not mean you write it in the dark. This course explicitly encourages
+**differential testing against CSNOBOL4** — the actively-maintained reference
+implementation of SNOBOL4 that descends from the original Bell Labs
+compiler — as a way of checking your own output, not as a source to copy
+from. If your interpreter and CSNOBOL4 disagree on a program that the
+language reference doesn't call out as ambiguous or implementation-defined,
+that disagreement is a bug in your code, and finding it that way is normal
+practice, not misconduct.
+
+The line is this: running a program through CSNOBOL4 to see what the correct
+answer is, and then writing your own code to produce that answer, is
+legitimate testing. Copying or transcribing CSNOBOL4's own source (or anyone
+else's interpreter, including another student's) into your submission is
+not. If you use any AI assistance beyond what's normal in an IDE
+(autocomplete, inline diagnostics), declare what you used and how in your
+submission — a line or two is enough. Undeclared assistance is treated the
+same as any other undeclared source.
+
+## Getting help
+
+Studios are the first place to get unstuck — a tutor is in the room and has
+usually seen the exact `match` exhaustiveness error you're looking at before.
+Outside studio hours, email reaches the person named on each
+[people page](/people/): course-level questions to the convenor, everything
+about a specific checkpoint or studio to the tutor. There's no separate
+office-hours booking system — an email gets a reply or a time to talk.

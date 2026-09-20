@@ -70,6 +70,32 @@ the thing each statement's subject and object are evaluated with.
   off-by-one here usually means the goto field is dispatching on the wrong
   outcome.
 
+## Sample transcript
+
+Genuine captured output from this course's own week-5 reference statement
+executor, run against a counting loop built entirely from assignment, a
+predicate, and the goto field:
+
+```text
+$ dune exec bin/main.exe -- examples/count.sno
+1
+2
+3
+4
+5
+DONE
+```
+
+The stopping point is worth tracing by hand: the loop increments and checks
+`LE(N,5)` *after* printing, so it prints `5` once more before the predicate
+finally fails and falls through to `DONE` — an off-by-one error in either
+direction would show up as `4` or `6` still appearing above `DONE`, not as a
+crash.
+
+This week's real starter — the goto-field dispatch and the six predicates
+stubbed out — is downloadable at
+[week-05-starter.zip](/downloads/week-05-starter.zip).
+
 ## Afterwards
 
 The statement executor and goto-field dispatch you build this week is what

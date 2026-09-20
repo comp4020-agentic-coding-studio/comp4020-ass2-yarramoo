@@ -63,6 +63,65 @@ loop's control flow at all.
   one should restore the cursor exactly on failure — including `ARB` and
   `ARBNO` after several failed extensions.
 
+## Sample transcript
+
+Genuine captured output from this course's own week-8 reference matcher,
+run against three of its four examples — the full transcript, including
+`arbno.sno`'s own trace, is in `interpreter/transcripts/week-08.txt`:
+
+```text
+$ dune exec bin/main.exe -- examples/basics.sno
+LEN OK
+ANY CORRECTLY FAILED
+NOTANY OK
+SPAN OK
+BREAK OK
+BREAK NULL-MATCH OK
+
+$ dune exec bin/main.exe -- examples/arb_growth.sno --trace
+matching against "MOUNTAIN"
+  trying match at position 0
+    "O" fails at 0
+  trying match at position 1
+    "O" matches at 1
+    at 2: trying first alternative, recording second on the history list
+    "" matches at 2
+    "A" fails at 2
+    backtrack: resuming recorded alternative at 2
+    LEN(1) matches at 2
+    at 3: trying first alternative, recording second on the history list
+    "" matches at 3
+    "A" fails at 3
+    backtrack: resuming recorded alternative at 3
+    LEN(1) matches at 3
+    at 4: trying first alternative, recording second on the history list
+    "" matches at 4
+    "A" fails at 4
+    backtrack: resuming recorded alternative at 4
+    LEN(1) matches at 4
+    at 5: trying first alternative, recording second on the history list
+    "" matches at 5
+    "A" matches at 5
+    matched, cursor now at 6
+ARB FOUND THE GAP
+
+$ dune exec bin/main.exe -- examples/bal.sno
+BAL MATCHED
+```
+
+The `arb_growth.sno` trace is worth reading in full: `ARB` retries at
+length 0, then 1, then 2, then 3 — one character at a time — before `"A"`
+finally follows at position 5, matching the lecture's
+`ARB = NULL | LEN(1) *ARB` definition exactly rather than jumping straight
+to the first plausible stopping point. `arbno.sno`'s own trace (not
+reproduced here) shows the identical one-unit-at-a-time growth, generalized
+from a single character to a whole repeated subpattern.
+
+This week's real starter — checkpoint 3's `ANY`/`NOTANY`/`SPAN`/`BREAK`/
+`ARB` carried over unchanged, with `ARBNO` and `BAL` stubbed out as this
+week's new work — is downloadable at
+[week-08-starter.zip](/downloads/week-08-starter.zip).
+
 ## Afterwards
 
 Your matcher now covers the primitives the Green Book treats as

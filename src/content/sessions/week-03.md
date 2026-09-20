@@ -48,6 +48,27 @@ grammar with variable references and adds the first statement form.
   referencing earlier ones (`X = 5`, `Y = X * 2 + 1`) should evaluate
   correctly in order.
 
+## Sample transcript
+
+Genuine captured output from this course's own week-3 reference evaluator,
+run against a short sequence of assignments:
+
+```text
+$ dune exec bin/main.exe -- examples/vars.sno
+11
+
+9
+```
+
+The blank middle line is worth tracing by hand, not a rendering glitch:
+`Z = UNSET` assigns `Z` the value of `UNSET`, a variable that has itself
+never been assigned, so it evaluates to the null string per this week's
+spec — that null string is what gets printed, not an error.
+
+This week's real starter — the symbol table wired up, with assignment and
+lookup themselves stubbed out — is downloadable at
+[week-03-starter.zip](/downloads/week-03-starter.zip).
+
 ## Afterwards
 
 The symbol table you build this week is the one the rest of the course reuses

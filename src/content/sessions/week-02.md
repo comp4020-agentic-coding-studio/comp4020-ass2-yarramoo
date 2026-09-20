@@ -44,6 +44,28 @@ over.
   node. Confirm `2 + 3 * 4` evaluates to `14`, not `20` — this is the
   precedence check that tells you the parser is doing its job.
 
+## Sample transcript
+
+Genuine captured output from this course's own week-2 reference parser and
+evaluator, run against four small arithmetic expressions:
+
+```text
+$ dune exec bin/main.exe -- examples/precedence.sno
+14
+20
+5
+2
+```
+
+The third and fourth lines are the ones worth tracing by hand: `10 - 2 - 3`
+evaluates to `5`, not `11`, and `20 / 4 / 2` evaluates to `2`, not `10` —
+both are left-associativity checks, since a right-associative reading of
+either expression would produce the other answer.
+
+This week's real starter — the Pratt parser skeleton with precedence
+climbing left as the gap to fill in — is downloadable at
+[week-02-starter.zip](/downloads/week-02-starter.zip).
+
 ## Afterwards
 
 This week's parser is the one you'll extend for variables (week 3) and

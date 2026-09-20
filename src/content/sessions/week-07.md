@@ -67,6 +67,53 @@ calls to exist, only a subject string and a cursor.
   succeeds, not the earliest occurrence of whichever alternative happens
   to be written first.
 
+## Sample transcript
+
+Genuine captured output from this course's own week-7 reference matcher,
+run against an alternation pattern (once plain, once with a `--trace` flag
+added for this session) and a `DEFINE`d predicate function built from
+alternation:
+
+```text
+$ dune exec bin/main.exe -- examples/alt.sno
+MATCHED
+
+$ dune exec bin/main.exe -- examples/alt.sno --trace
+matching against "ZZBA"
+  trying match at position 0
+    at 0: trying first alternative, recording second on the history list
+    "A" fails at 0
+    backtrack: resuming recorded alternative at 0
+    "B" fails at 0
+  trying match at position 1
+    at 1: trying first alternative, recording second on the history list
+    "A" fails at 1
+    backtrack: resuming recorded alternative at 1
+    "B" fails at 1
+  trying match at position 2
+    at 2: trying first alternative, recording second on the history list
+    "A" fails at 2
+    backtrack: resuming recorded alternative at 2
+    "B" matches at 2
+    matched, cursor now at 3
+MATCHED
+
+$ dune exec bin/main.exe -- examples/define_match.sno
+NO
+YES
+```
+
+The trace is worth reading line by line: at every position from 0 to 2,
+`"A"` is tried and fails before `"B"` is ever tried — even though `'B'`
+occurs earlier in the subject `"ZZBA"` than `'A'` does — which is exactly
+the "both alternatives tried at this position before the cursor advances"
+behaviour this week's spec asks you to demonstrate, not a coincidence of
+this particular subject.
+
+This week's real starter — the pattern type in place, with the matcher's
+backtracking left as the gap to fill in — is downloadable at
+[week-07-starter.zip](/downloads/week-07-starter.zip).
+
 ## Afterwards
 
 You now have a pattern value, a cursor that behaves correctly under the

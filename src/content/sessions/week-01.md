@@ -51,6 +51,32 @@ asked, briefly, which account you'd trust and why.
   intentionally small: the shape of the pipeline matters more this week than
   its coverage.
 
+## Sample transcript
+
+Genuine captured output from this course's own week-1 reference lexer, run
+against a three-line file of bare integer literals:
+
+```text
+$ dune exec bin/main.exe -- examples/digits.sno
+INT 42
+EOF
+INT 7
+EOF
+INT 100
+INT 200
+EOF
+```
+
+The third line, `  100  200`, is the one worth tracing by hand: it holds two
+literals separated (and preceded) by blanks, and the only thing this week's
+lexer has to get right is that a run of digits becomes one `INT` token while
+a blank is just a separator — the trace should show a single `EOF` closing
+that line, not one per literal.
+
+This week's real starter — the same lexer skeleton with the digit-recognition
+rule itself stubbed out — is downloadable at
+[week-01-starter.zip](/downloads/week-01-starter.zip).
+
 ## Afterwards
 
 What you build this week is the foundation the next three weeks extend

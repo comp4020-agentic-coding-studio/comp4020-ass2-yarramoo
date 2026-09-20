@@ -62,6 +62,50 @@ automatically instead of by hand.
   describes as legitimate testing, now automated rather than performed
   by hand once per checkpoint.
 
+## Sample transcript
+
+Genuine captured output from this course's own week-11 reference parser and
+its differential-testing harness — all eight of last week's examples still
+produce byte-identical output under week 11's positioned parser, so this
+excerpt covers only what's new: a deliberately malformed file exercising
+the diagnostics, and the harness script itself:
+
+```text
+$ dune exec bin/main.exe -- error_examples/recovery.sno
+line 15, column 18: expected an expression but found end of line
+line 31, column 21: expected ')' to close the '(' opened at line 31, column 15, but found end of line
+(exit code 1 -- recovered errors block execution, per main.ml)
+
+$ ./scripts/diff_test.sh
+== building interpreter ==
+== CSNOBOL4_BIN is unset or not executable ==
+== no real CSNOBOL4 binary is available in this environment, so this run only
+== exercises this repo's own interpreter (and still catches its own crashes).
+== set CSNOBOL4_BIN=/path/to/csnobol4 to get a genuine differential comparison.
+OK (ran without crashing): arbno_bal.sno
+OK (ran without crashing): arrays.sno
+OK (ran without crashing): bind_replace.sno
+OK (ran without crashing): concat_alt.sno
+OK (ran without crashing): literal.sno
+OK (ran without crashing): primitives.sno
+OK (ran without crashing): regression.sno
+OK (ran without crashing): tables.sno
+== 8 example(s), 0 failure(s) ==
+== reminder: this was NOT a real differential comparison -- see above. ==
+```
+
+Both errors above are worth tracing by hand: the first names a single
+location (an operator with nothing after it), and the second names two —
+the `(` that opened, and the `)` that never arrived to close it — exactly
+the two-location diagnostic this week's spec asks for. The harness's own
+honesty is worth noting too: with no CSNOBOL4 binary available in this
+environment, it says so explicitly rather than fabricating a disagreement
+or silently only checking half of what it promises.
+
+This week's real starter — the located-diagnostics and recovery logic
+stubbed out to their single-location, first-error-only equivalents — is
+downloadable at [week-11-starter.zip](/downloads/week-11-starter.zip).
+
 ## Afterwards
 
 Your interpreter now says *where* something went wrong, not just *that*

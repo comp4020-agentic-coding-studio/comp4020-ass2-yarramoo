@@ -68,6 +68,39 @@ changes how the compiler is told to treat that type.
   work a hand-written check in 1969 assembler could only do if someone
   remembered to write it.
 
+## Sample transcript
+
+Genuine captured output from this course's own week-10 reference evaluator,
+run against the two examples that exercise this week's new value
+constructors directly — the full transcript across all eight examples is in
+`interpreter/transcripts/week-10.txt`:
+
+```text
+$ dune exec bin/main.exe -- examples/arrays.sno
+A<1>=10 A<2>=20 A<3>=30
+UNSET A<4>=[]
+B<1>=X B<2>=X B<3>=X
+OUT-OF-BOUNDS READ CORRECTLY FAILED
+ZERO INDEX CORRECTLY FAILED (1-BASED)
+
+$ dune exec bin/main.exe -- examples/tables.sno
+NAME=ADA YEAR=1815
+MISSING KEY CORRECTLY FAILED
+VIA ROW: ROW<1>=99
+VIA A FRESH FETCH: ROW2<1>=99
+```
+
+`tables.sno`'s last two lines are worth tracing by hand: `ROW` and `ROW2`
+are two separate lookups of the same table entry, and both see the
+mutation made through `ROW` — the table identity check this week's spec
+asks for, which a copy-on-read implementation would pass on a naive test
+and fail here.
+
+This week's real starter — checkpoint 3's completed matcher untouched, with
+the two new value constructors and their fail-not-throw indexing stubbed
+out — is downloadable at
+[week-10-starter.zip](/downloads/week-10-starter.zip).
+
 ## Afterwards
 
 The value type is now wide enough for everything the final project's

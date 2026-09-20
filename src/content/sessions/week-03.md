@@ -1,0 +1,49 @@
+---
+title: Assignment and a symbol table
+description:
+  Implementing assignment statements over a single flat symbol table —
+  variables as SNOBOL4 actually has them, not as most languages have them
+week: 3
+date: 2027-03-08
+teachers:
+  - marisol-quaye
+spec:
+  - your evaluator has a symbol table mapping names to values, built once,
+    consulted at run time, with no lexical scoping
+  - assignment statements (subject blank object, no = token) update the
+    symbol table
+  - looking up a name that has never been assigned returns the null string
+    rather than an error
+related:
+  - lectures/week-03
+---
+
+## Before the session
+
+Bring week 2's parser and evaluator. This week extends the expression
+grammar with variable references and adds the first statement form.
+
+## In the session
+
+- **Add variable tokens.** A bare identifier is a variable reference. Extend
+  the parser so an identifier can appear anywhere a literal currently can.
+- **Build the symbol table.** One mutable table, name to value, built once
+  and shared for the whole run — resist the urge to reach for anything
+  scope-chain-shaped. That impulse is exactly the mainstream-language
+  intuition this week's lecture asks you to set aside; a flat table is not a
+  shortcut here, it's the correct model.
+- **Implement assignment.** `subject` blank `object`, no `=` token, updates
+  the subject's cell in the symbol table to the object's evaluated value. A
+  reference to a variable that has never been assigned should evaluate to
+  the null string rather than raising an error — decide now how your `value`
+  type represents that, since it's the same question week 4's strings answer
+  more fully.
+- **Check it end to end.** A short sequence of assignments and expressions
+  referencing earlier ones (`X = 5`, `Y = X * 2 + 1`) should evaluate
+  correctly in order.
+
+## Afterwards
+
+The symbol table you build this week is the one the rest of the course reuses
+without redesigning it — this is the one place "everything is global" pays
+off as a simplification rather than a constraint.

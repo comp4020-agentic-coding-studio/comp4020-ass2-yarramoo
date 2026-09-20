@@ -1,48 +1,211 @@
 ---
-title: Opening lecture
-description: The placeholder deck — replace it with a real deck for your course
+title: Why SNOBOL
+description: Bell Labs, 1962 — where SNOBOL came from and why this course builds SNOBOL4
 ---
 
-# Opening lecture
+{/* _class: impact */}
 
-{/* STARTER_CONTENT: replace this deck, then remove this comment. */}
+# Implementing SNOBOL4
 
-Replace this deck. It is here to show that slides are part of the site, built
-from the same markdown as everything else.
+Week 1 — Why SNOBOL
+
+```notes
+Housekeeping first if there's any, then straight into the history. This
+deck exists to be talked over, not read from — the lecture page has the
+full prose version of everything here.
+```
 
 ---
 
-## Slides are markdown
+## Bell Labs, 1962
 
-A `---` starts a new slide. Everything else is ordinary markdown: headings,
-lists, links, tables, images, fenced code.
+Holmdel, New Jersey. A department working on high-level, nonnumerical
+computation.
 
-- one idea per slide
-- the fewest words that carry it
-- the deck is a performance artefact, so it can say things a page wouldn't
+**David J. Farber, Ralph E. Griswold, Ivan P. Polonsky** needed a better
+tool for manipulating symbolic expressions in their own research —
+and built one, rather than waiting for one to exist.
+
+---
+
+## Not a product. A tool that got used.
+
+SNOBOL was not commissioned. It grew out of what its own authors needed
+for their own work, then kept getting used because it kept working.
+
+```notes
+Worth pausing on: this is the opposite origin story to most languages
+students will have met. Not designed top-down against a spec.
+```
+
+---
+
+{/* _class: quote */}
+
+> "SNOBOL, SNOBOL2, and SNOBOL3 [are] more properly considered separate
+> languages than versions of one language."
+>
+> — Ralph Griswold, 1981
+
+---
+
+## SNOBOL4: the fourth language, not the fourth patch
+
+- designed from 1966, running by 1967
+- unlimited-length strings
+- **pattern matching promoted to a first-class data type**
+- arrays, tables
+- SIL: a portable implementation strategy — a hypothetical assembly
+  language for an abstract machine
+
+---
+
+## SIL bought SNOBOL4 reach
+
+Write the interpreter against a small virtual instruction set, not any
+one machine's assembler.
+
+Result: roughly **fifty machines and operating systems** by the late
+1970s.
+
+```notes
+Same trick this course reaches for if the compiler ever targets a
+bytecode VM instead of native code. Foreshadowing, not a promise.
+```
+
+---
+
+{/* _class: centered */}
+
+## The naming story — two tellings, neither fully verifiable
+
+**Griswold's own account**: he coined "SNOBOL," then reverse-engineered
+"StriNg Oriented symBOlic Language" afterward, as a joke.
+
+**Farber's account**: a "snowball's chance in hell" moment, over coffee.
+
+---
+
+## Why this course takes no side
+
+Both tellers were there. They disagree on the *mechanism*, not just the
+colour.
+
+A small, concrete lesson about oral history vs. primary documents — and
+it matters more to how you read sources than the specific fact does.
+
+```notes
+One thing every account agrees on, worth saying out loud: SNOBOL is not
+related to COBOL. Deliberate wordplay, no other connection.
+```
 
 ---
 
 {/* _class: impact */}
 
-# A slide class
+## Why SNOBOL4, specifically, in a compilers course
 
-`{/* _class: impact */}` fills the slide with the brand colour. `quote`,
-`banner` and `centered` are the others the theme styles.
+Not sentiment. A structural reason.
 
 ---
 
-## What else is here
+## What makes SNOBOL4 different
 
-```sh
-pnpm dev
-pnpm check
+A "build a compiler for a C-like language" course teaches you a lot.
+It does not teach you this:
+
+**pattern matching as a first-class, backtracking data type** — not
+syntax bolted onto a regular-expression engine.
+
+---
+
+## Where the semester actually goes
+
+| Movement | Weeks | What |
+|---|---|---|
+| I | 1–4 | Calculator that talks back |
+| II | 5–6 | Programs that can fail |
+| **III** | **7–9** | **The pattern engine** |
+| IV | 10–12 | What kind of thing is a value |
+
+Movement III is the centre of gravity. Everything before it is
+preparation, honestly framed as such.
+
+---
+
+## A course designed not to be abandoned in week 6
+
+Weeks 1–4 already produce something you can run: a calculator. Small,
+but load-bearing — everything later sits *on top of it*, not beside it.
+
+```notes
+This is worth saying explicitly to students: the payoff isn't deferred
+to week 12. You have a working interpreter, however small, from week 4.
 ```
 
-The second command proves the deck compiles with the rest of the site. Use the
-first to inspect every slide at the desktop and phone marking viewports; slide
-fit and legibility are visual judgements.
+---
 
-The [astromotion](https://github.com/ANUcybernetics/astromotion) README has the
-rest of the syntax: speaker notes, backgrounds, QR codes, fragments, and
-components hydrated per slide.
+{/* _class: banner */}
+
+## Why OCaml
+
+Two structural properties of SNOBOL4 map directly onto language
+features, not library support.
+
+---
+
+## Property one: success/failure is the only branch
+
+No `if`. No `while`. No `for`.
+
+Every SNOBOL4 statement succeeds or fails — that signal, not a boolean,
+is the language's only control-flow primitive.
+
+**This is what a sum type is built to express.**
+
+---
+
+## Property two: every value is dynamically tagged
+
+A variable can hold a string, an integer, a real, a pattern, an array, a
+table, or a programmer-defined record.
+
+In OCaml: one variant type, one constructor per SNOBOL type — the
+compiler checks every place that inspects a value handles every case.
+
+```notes
+And it mirrors the real historical implementation: SNOBOL4's own runtime
+represented every value as a tagged descriptor, for the same reason.
+```
+
+---
+
+## Property three (arriving week 7): backtracking is a recursive interpreter
+
+Try an alternative; on failure, unwind and try the next one.
+
+A standard shape for a small recursive interpreter in a language with
+pattern matching and sum types built in.
+
+---
+
+{/* _class: quote */}
+
+> Andrew Appel's *Modern Compiler Implementation in ML* builds an entire
+> compiler this way — this course borrows the structure, swaps the toy
+> source language for a real, historically significant one.
+
+---
+
+## By the end of this week
+
+A toy calculator: read an integer literal, evaluate it.
+
+`ocamllex` for lexing. A hand-built or generator-built parser for the
+rest, whichever a given week's grammar calls for.
+
+```notes
+Studio starts now. The lecture page's "Further reading" has full
+citations for everything on this deck — Griswold 1981, Farber/Griswold/
+Polonsky 1964, Appel 1998, the OCaml manual's lexyacc chapter.
+```

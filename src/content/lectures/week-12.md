@@ -8,6 +8,7 @@ week: 12
 date: 2027-05-10
 teachers:
   - idris-fenn
+slides: /decks/week-12/
 related:
   - lectures/week-11
   - sessions/week-12

@@ -7,6 +7,7 @@ week: 7
 date: 2027-04-05
 teachers:
   - marisol-quaye
+slides: /decks/week-07/
 related:
   - lectures/week-01
   - sessions/week-07

@@ -1,0 +1,12 @@
+* Checkpoint 1's features (arithmetic, concatenation, OUTPUT) still
+* work unchanged -- but note every line here is indented. Checkpoint 2
+* introduces the real, column-sensitive label rule (a label starts in
+* column 1), so a statement with no label must now start with a blank;
+* checkpoint 1 had no such rule and could start any statement in
+* column 1. This is a genuine, deliberate behaviour change between the
+* two checkpoints' concrete syntax, not a regression.
+        GREETING = 'HELLO, ' 'SNOBOL4!'
+        OUTPUT = GREETING
+        OUTPUT = 2 + 3 * 4
+        OUTPUT = (2 + 3) * 4
+        OUTPUT = 7 / 2

@@ -1,0 +1,10 @@
+* Checkpoint 2: DEFINE/RETURN with a real save/restore call frame.
+* SQUARE is defined once, then called twice; note the explicit END
+* label -- without it, execution would fall straight off OUTPUT =
+* SQUARE(7) into SQUARE's own body as if it were an ordinary top-level
+* statement, which is not what we want.
+        DEFINE('SQUARE(X)')
+        OUTPUT = SQUARE(6)
+        OUTPUT = SQUARE(7)
+END     N = N
+SQUARE  SQUARE = X * X          :(RETURN)

@@ -1,0 +1,9 @@
+* Checkpoint 2: goto fields and the GT predicate build a loop.
+* A label starts in column 1; every other line here is indented.
+* Counts 1 through 5, then falls off the failure branch to the line
+* after LOOP's failure target and halts.
+        N = 1
+LOOP    OUTPUT = N
+        N = N + 1
+        GT(N,5)         :F(LOOP)
+        OUTPUT = 'DONE'

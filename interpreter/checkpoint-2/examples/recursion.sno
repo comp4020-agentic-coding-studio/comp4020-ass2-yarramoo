@@ -1,0 +1,11 @@
+* Recursive factorial via DEFINE/RETURN. This exercises the
+* save/restore call-frame discipline for real: N is a single global
+* variable, but each recursive FACT(N-1) call saves the caller's N,
+* binds its own, and restores the caller's N on return -- so recursion
+* works correctly even though nothing here is lexically scoped.
+        DEFINE('FACT(N)')
+        OUTPUT = FACT(5)
+END     N = N
+FACT    LE(N,1)                  :S(BASE)
+        FACT = N * FACT(N - 1)   :(RETURN)
+BASE    FACT = 1                 :(RETURN)

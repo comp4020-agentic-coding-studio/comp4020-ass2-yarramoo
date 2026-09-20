@@ -1,0 +1,7 @@
+* Checkpoint 2: a genuinely failing built-in. Arithmetic on a
+* non-numeric string fails the statement rather than crashing the
+* interpreter, and the goto field routes around it.
+        X = 'HELLO'
+        Y = X + 1                :F(BAD)
+        OUTPUT = 'UNREACHABLE'
+BAD     OUTPUT = 'ARITHMETIC FAILED AS EXPECTED'

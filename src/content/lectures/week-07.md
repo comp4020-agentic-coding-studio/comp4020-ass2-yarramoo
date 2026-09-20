@@ -106,6 +106,17 @@ chain. It doesn't commit to whichever branch happens to work first at a
 given position and move on for good; it retries, and only something like
 `FENCE` or `ABORT` can make a choice actually final.
 
+That instrument is not hypothetical: this week's own reference matcher takes a
+`--trace` flag, and printing every position the cursor tries alongside every
+alternative the history list records and resumes is part of what this week's
+studio asks you to build. A captured run of it sits on
+[this week's session page](/sessions/week-07/). It traces `'A' | 'B'` against
+`ZZBA` rather than the pattern above — `ABORT` is out of scope for the matcher
+you build here — but it makes the same shape visible: both alternatives are
+tried and fail at position 0, then again at 1, before the cursor is allowed to
+reach 2, where the *second* alternative matches even though the first would
+have matched further along at 3.
+
 ## Two ways to backtrack
 
 There are two documented, working answers to "how does the matcher

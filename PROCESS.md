@@ -1,53 +1,71 @@
 # Process overview
 
-<!-- TEMPLATE: this file is a shape to fill in, not a form. Replace everything
-     in it with your own overview, and delete this comment — `pnpm
-     check:evidence` will remind you if it's still here. -->
-
-Written by you, for a reader: how you got from the brief to the harness and
-agentic workflow behind this submission. Markers read this file and follow its
-citations; they don't trawl the repo for evidence you didn't point at.
-
-This file is the shape; the course site's
-[assessment page](https://comp.anu.edu.au/courses/comp4020-agentic-coding-studio/topics/assessment/#what-you-submit)
-is the requirement, and its
-[word counts](https://comp.anu.edu.au/courses/comp4020-agentic-coding-studio/topics/assessment/#word-counts)
-cover every deliverable.
-
 ## What I built
 
-One paragraph: the thing, and the idea behind it.
+**Implementing SNOBOL4** (`SLOP6753`): a 12-week compiler-construction studio
+built around a single 1962 language and the backtracking pattern-matching
+engine that made it strange. The curriculum's structural idea is that four
+checkpoints hand students a real, partially-complete OCaml codebase (this
+week's new feature stubbed as `failwith "TODO"`, plus a genuine captured
+transcript of the finished behaviour), not an in-browser toy — so "done" is
+checkable against real output rather than a rubric's opinion.
 
 ## How I got here
 
-The account of the process: how the work actually went, and how you knew the
-result was right. Tell it in whatever order makes it clear. A weekly prototype
-needs a paragraph or two; an assignment needs more.
+`research/` already committed this course to a SNOBOL4-in-OCaml compiler
+before any site content existed, so the first work
+([`9ed5765`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/9ed5765))
+was identity: title, code, tags, and replacing the four starter placeholder
+images, which `check:evidence`'s SHA check gates on directly.
 
-Cite the record as you go, as links whose text is the commit hash or range and
-whose target is this repo's commit or compare URL, so a reader clicks straight
-to the evidence:
+Curriculum content went in movement by movement, each batch a separate
+commit, so a bad batch could be caught before the next one built on it:
+[`d82f1c4`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/d82f1c4)
+(Movement I),
+[`ec438e5`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/ec438e5)
+(Movement II),
+[`b2a7f95`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/b2a7f95)
+(Movement III), and
+[`4adfb9f`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/4adfb9f)
+(Movement IV). Every factual claim on a lecture page traces to a cited source
+in `research/`; nothing marked `unverified:` there made it onto a page as
+settled fact.
 
-- one commit: [`a1b2c3d`](https://github.com/YOUR-ORG/YOUR-REPO/commit/a1b2c3d)
-- a range:
-  [`a1b2c3d...e4f5a6b`](https://github.com/YOUR-ORG/YOUR-REPO/compare/a1b2c3d...e4f5a6b)
+The riskiest decision was making the four checkpoints genuinely-working OCaml,
+not simulated:
+[`8d315db...4f3a6f4`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/compare/8d315db...4f3a6f4)
+builds checkpoints 1–3 as real `dune` projects, tags each solution and its
+starter (the solution with the new feature stubbed back out) separately, and
+zips the starters for download. I verified this wasn't theatre by checking out
+each `-solution` tag in a disposable worktree and re-running its example
+programs against the committed transcript — trust the check, not my memory of
+having written it. Two process gaps surfaced and are worth naming rather than
+hiding: the checkpoint-1 commits
+([`8d315db`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/8d315db),
+[`ceecc51`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/ceecc51))
+predate this repo's attribution convention and carry no `Co-Authored-By`
+trailer; and the checkpoint-1 and checkpoint-2 starter zips were committed
+together in
+[`c2644cc`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/c2644cc)
+rather than each alongside its own starter tag, a one-commit lag caught and
+closed rather than left silent.
 
-To pair a prompt with the commit it produced, quote the prompt (curated, not a
-full transcript) next to the citation:
+The home page
+([`f681465`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/f681465))
+and its schedule table are built last, by design: they read the four
+movements and the full 12-week table straight out of the content collections
+at render time, so the table can't drift out of sync with the pages it links
+to. The three decks
+([`ab8f2c5`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/ab8f2c5))
+and the retro line-printer styling pass
+([`d7c8138`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/d7c8138))
+followed, each checked against `pnpm build`'s a11y, base-path-link, and
+astromotion structural checks before committing — a red check blocked the next
+step rather than getting silenced.
 
-> the prompt, verbatim
-
-Screenshots are welcome where one carries the point better than a sentence does.
-Commit the file to this repo and link it with a **relative** path, which is what
-makes it render on GitHub: `![alt text](docs/before.png)`. Images don't count
-towards the word count and don't replace the citation.
-
-## Before you ship
-
-`pnpm check:evidence` verifies that this comment is gone, that your citations
-resolve to real commits, that a crit week's reflection entry is in
-`reflections/`, and that your `CLAUDE.md` is there. It checks that your account
-is traceable, not that it is good: that is the marker's call.
-
-Images aren't checked: unlike a citation whose SHA doesn't resolve, a broken
-image is visible the moment this file is rendered on GitHub.
+The last pass was verification, not new content: `pnpm build` (Astro's
+content check, the theme's a11y and base-path-link checks, the course-graph's
+`related:` validation, and astromotion's per-deck structural check) and the
+`spec/` suite all green before any of the above got pushed, and `pnpm
+check:evidence` closed out the remaining starter markers and this file's own
+template comment.

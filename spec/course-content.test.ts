@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -93,10 +94,16 @@ describe("pages agree with the code they describe", () => {
   const MOVEMENT_III = ["LEN", "ANY", "NOTANY", "SPAN", "BREAK", "ARB", "ARBNO"];
 
   it("implements every Movement III primitive the pages promise", () => {
-    const dir = "interpreter/checkpoint-3/lib";
-    const sources = readdirSync(dir).filter((name) => name.endsWith(".ml"));
-    expect(sources.length, `no OCaml sources under ${dir}`).toBeGreaterThan(0);
-    const lib = sources.map((name) => readFileSync(`${dir}/${name}`, "utf8")).join("\n");
+    // Read the tagged SOLUTION, not the worktree: the worktree holds the
+    // starter, whose stub comments enumerate the very primitives they leave
+    // as `failwith "TODO"` -- so a name-in-source check passes there against
+    // an implementation that does nothing. Comments are stripped for the same
+    // reason: a primitive named only in prose isn't implemented either.
+    const lib = execFileSync(
+      "git",
+      ["show", "checkpoint-3-solution-v2:interpreter/checkpoint-3/lib/eval.ml"],
+      { encoding: "utf8" },
+    ).replace(/\(\*[\s\S]*?\*\)/g, " ");
     for (const primitive of MOVEMENT_III) {
       expect(
         new RegExp(`\\b${primitive}\\b`).test(lib),

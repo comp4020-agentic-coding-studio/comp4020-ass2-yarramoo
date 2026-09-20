@@ -1,0 +1,17 @@
+$ dune exec bin/main.exe -- examples/loop.sno
+1
+2
+3
+4
+5
+DONE
+
+$ dune exec bin/main.exe -- examples/define.sno
+36
+49
+
+$ dune exec bin/main.exe -- examples/recursion.sno
+120
+
+$ dune exec bin/main.exe -- examples/fail.sno
+ARITHMETIC FAILED AS EXPECTED

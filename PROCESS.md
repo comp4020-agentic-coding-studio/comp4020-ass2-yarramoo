@@ -173,3 +173,23 @@ existing bare pages actually get linked in) and given its own `CardGrid`
 card besides; `week-01.md`'s "Before the session" section now links it in
 place of its old "install an OCaml toolchain" instruction with nothing to
 point at.
+
+The three decks (`ab8f2c5`) shipped with no imagery at all — a later pass
+added one background photo to each, real and licensed rather than invented
+or stock: week 1's Bell Labs slide gets an aerial photo of the Bell Labs
+Holmdel Complex (Lee Beaumont, CC BY-SA 2.0), week 7's explicit-stack slide
+gets a photo of an IBM System/360 punched program card deck, circa 1969
+(ArnoldReinhold, CC BY-SA 3.0), and week 12's S4D58 slide gets a photo of an
+IBM System/360 console (Erik Pitti, CC BY 2.0) — all three sourced from
+Wikimedia Commons, each credited by photographer and license in that
+slide's own speaker notes rather than as visible on-slide text. A Griswold
+portrait was the first thing looked for, for week 1's origin-story slide;
+none turned up on Wikimedia Commons under that search, and rather than
+substitute an unrelated image or a stock photo, that slide simply has no
+portrait. Adding the first credit line as visible on-slide text (week 7's
+slide already carried three paragraphs) overflowed astromotion's fixed
+1280×720 canvas — caught by an `agent-browser` screenshot, not by `pnpm
+check`, which stayed green throughout since astromotion's own structural
+check doesn't measure rendered height. Fixed by moving all three credit
+lines into each slide's speaker notes instead, then re-verified all three
+slides by screenshot after rebuilding.

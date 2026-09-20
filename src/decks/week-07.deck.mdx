@@ -157,6 +157,8 @@ along the string.
 
 ## The real SNOBOL4 runtime: an explicit stack
 
+![bg left:36%](./assets/week-07-punched-card-deck.jpg)
+
 SIL v3.11's pattern matcher (`SCNR`/`SCIN`) walks a compiled chain of
 pattern nodes.
 
@@ -169,6 +171,9 @@ Failure → `SALF`/`SALT` pop and resume from exactly there.
 Not an isolated choice — the same discipline shows up in the storage
 manager's GC mark phase. Explicit push/pop, not the host assembler's
 call/return, wherever backtracking-shaped control flow is needed.
+
+Background photo: an IBM System/360 program deck, circa 1969. ArnoldReinhold,
+CC BY-SA 3.0, via Wikimedia Commons.
 ```
 
 ---

@@ -101,17 +101,24 @@ and parse_concat (st : state) : expr =
   done;
   !lhs
 
-(* Alternation, "|" -- the lowest precedence level of all, below
-   concatenation, since concatenation distributes over alternation from
-   the right [Gimpel1973]: `'A' 'B' | 'C'` must parse as
-   `('A' 'B') | 'C'`, not `'A' ('B' | 'C')`. *)
+(* TODO(week 7): implement alternation, "|" -- the lowest precedence
+   level of all, below concatenation, since concatenation distributes
+   over alternation from the right [Gimpel1973]: `'A' 'B' | 'C'` must
+   parse as `('A' 'B') | 'C'`, not `'A' ('B' | 'C')`. Loop while the
+   next token is [PIPE], consuming it and building
+   [Alt (lhs, parse_concat st)] each time, the same shape as
+   [parse_addsub]'s loop above.
+
+   Deliberately NOT a whole-function [failwith] stub: [parse_expr]
+   (below) is [parse_alt], so *every* expression anywhere in the
+   program -- including plain assignment right-hand sides that never
+   contain a "|" -- passes through here. Only the actual "|" case is
+   unimplemented. *)
 and parse_alt (st : state) : expr =
-  let lhs = ref (parse_concat st) in
-  while peek st = PIPE do
-    ignore (advance st);
-    lhs := Alt (!lhs, parse_concat st)
-  done;
-  !lhs
+  let lhs = parse_concat st in
+  match peek st with
+  | PIPE -> failwith "TODO: implement pattern alternation ('|') -- see the comment above"
+  | _ -> lhs
 
 let parse_expr st = parse_alt st
 
@@ -157,7 +164,14 @@ let parse_goto (st : state) : goto option =
 (* A statement body is [subject], [subject = object], or
    [subject pattern] -- no replacement this week (see the module
    comment). The subject is parsed once, as a single [parse_primary],
-   and what follows it decides which of the three shapes this is. *)
+   and what follows it decides which of the three shapes this is.
+
+   TODO(week 7): the [EQUALS] and fall-through (bare [Expr]) branches
+   below are checkpoint 2's assignment/bare-expression logic, unchanged,
+   and already work. What's missing is the middle branch: when
+   something that could start an operand follows the subject, a pattern
+   is present -- parse it with [parse_alt] (concatenation and
+   alternation both included) and build [Match (subject, pattern)]. *)
 let parse_body (st : state) : stmt_body =
   let subject = parse_primary st in
   match peek st with
@@ -169,8 +183,9 @@ let parse_body (st : state) : stmt_body =
       Assign (name, obj)
     | _ -> raise (Parse_error "left-hand side of '=' must be a plain identifier"))
   | t when starts_operand t ->
-    let pattern = parse_alt st in
-    Match (subject, pattern)
+    failwith
+      "TODO: implement pattern-match statement parsing (subject pattern) -- \
+       see the comment above [parse_body]"
   | _ -> Expr subject
 
 let parse_stmt (label : string option) (toks : token list) : stmt =

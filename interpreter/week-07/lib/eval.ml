@@ -47,13 +47,13 @@ let to_int = function
      | None -> raise Fail_signal)
   | VPattern _ -> failwith "cannot convert a pattern to a number"
 
-(* A plain string or number used where a pattern is expected matches
-   itself literally (research/snobol/03-pattern-matching.md: "a string
-   used as a pattern matches itself"). *)
-let to_pattern = function
-  | VPattern p -> p
-  | VStr s -> PLit s
-  | VInt n -> PLit (string_of_int n)
+(* TODO(week 7): a plain string or number used where a pattern is
+   expected matches itself literally (research/snobol/
+   03-pattern-matching.md: "a string used as a pattern matches itself").
+   [VPattern p] is already a pattern -- return it unchanged. [VStr s] /
+   [VInt n] become a literal [PLit] of their printed form. *)
+let to_pattern (_v : value) : pattern =
+  failwith "TODO: to_pattern (VPattern -> itself; VStr/VInt -> PLit of their printed form)"
 
 let env : (string, value) Hashtbl.t = Hashtbl.create 64
 
@@ -110,71 +110,61 @@ let build_labels (prog : stmt array) : unit =
 let trace_enabled = ref false
 let trace (msg : string) : unit = if !trace_enabled then print_endline msg
 
-(* The explicit-stack backtracking matcher. [choice] is one recorded,
-   not-yet-tried alternative: the pattern to try if everything after
-   this choice point fails, what still has to match after it succeeds,
-   and the cursor position to resume at (the position [PAlt] was
-   reached at, since neither alternative has moved the cursor yet).
-
-   [match_from] tries to match [pat] against [subj] starting exactly at
-   [start] (anchored -- it never itself advances the cursor to a later
-   starting position; that is [find_match]'s job below). [step] walks
-   the pattern list still to be matched, pushing a [choice] onto
-   [stack] every time it reaches a [PAlt] and consulting [backtrack]
-   whenever a [PLit] fails to match. This is the same last-in/first-out
-   discipline as the real interpreter's Pattern-Matching History List:
-   the most recently recorded alternative is the first one resumed. *)
+(* [choice] is one recorded, not-yet-tried alternative: the pattern to
+   try if everything after this choice point fails, what still has to
+   match after it succeeds, and the cursor position to resume at (the
+   position [PAlt] was reached at, since neither alternative has moved
+   the cursor yet). This is the "history list" the module comment
+   describes -- keep it as explicit, inspectable data on [stack], not
+   hidden inside a closure or continuation. *)
 type choice = { alt : pattern; rest : pattern list; at : int }
 
-let match_from (pat : pattern) (subj : string) (start : int) : int option =
-  let len = String.length subj in
-  let stack : choice list ref = ref [] in
-  let rec step (todo : pattern list) (pos : int) : int option =
-    match todo with
-    | [] ->
-      trace (Printf.sprintf "    matched, cursor now at %d" pos);
-      Some pos
-    | PLit s :: rest ->
-      let l = String.length s in
-      if pos + l <= len && String.sub subj pos l = s then begin
-        trace (Printf.sprintf "    %S matches at %d" s pos);
-        step rest (pos + l)
-      end else begin
-        trace (Printf.sprintf "    %S fails at %d" s pos);
-        backtrack ()
-      end
-    | PConcat (p1, p2) :: rest -> step (p1 :: p2 :: rest) pos
-    | PAlt (p1, p2) :: rest ->
-      stack := { alt = p2; rest; at = pos } :: !stack;
-      trace (Printf.sprintf "    at %d: trying first alternative, recording second on the history list" pos);
-      step (p1 :: rest) pos
-  and backtrack () : int option =
-    match !stack with
-    | [] -> None
-    | { alt; rest; at } :: tl ->
-      stack := tl;
-      trace (Printf.sprintf "    backtrack: resuming recorded alternative at %d" at);
-      step (alt :: rest) at
-  in
-  step [ pat ] start
+(* TODO(week 7): implement the explicit-stack backtracking matcher.
+   [match_from pat subj start] tries to match [pat] against [subj]
+   starting exactly at [start] (anchored -- it never itself advances
+   the cursor to a later starting position; that is [find_match]'s job
+   below, not this function's). Returns [Some end_pos] on success,
+   [None] if every recorded alternative has been exhausted.
 
-(* Unanchored search (research/snobol/03-pattern-matching.md, "matching
-   is inherently unanchored"): try every alternative at position 0
-   first (via [match_from]'s own history list) before moving the cursor
-   forward at all, and only advance to the next starting position once
-   every alternative recorded at the current one has been exhausted. *)
-let find_match (pat : pattern) (subj : string) : int option =
-  let len = String.length subj in
-  let rec try_from start =
-    if start > len then None
-    else begin
-      trace (Printf.sprintf "  trying match at position %d" start);
-      match match_from pat subj start with
-      | Some endp -> Some endp
-      | None -> try_from (start + 1)
-    end
-  in
-  try_from 0
+   A reasonable shape is two mutually recursive local functions closed
+   over a [stack : choice list ref]:
+
+   - [step todo pos]: [todo] is the list of pattern pieces still to be
+     matched, left to right; [pos] is the current cursor.
+       - [[]]: nothing left to match -- succeed with [Some pos].
+       - [PLit s :: rest]: does [s] occur in [subj] starting at [pos]?
+         If so, continue with [step rest (pos + String.length s)]. If
+         not, this path has failed -- call [backtrack ()] instead of
+         returning [None] directly, so a still-untried alternative
+         elsewhere on the stack gets a chance.
+       - [PConcat (p1, p2) :: rest]: concatenation is just sequencing --
+         [step (p1 :: p2 :: rest) pos].
+       - [PAlt (p1, p2) :: rest]: push [{ alt = p2; rest; at = pos }]
+         onto [stack] (recording the untried right-hand alternative,
+         resumable at the *same* position, since nothing has matched
+         yet), then try the left: [step (p1 :: rest) pos].
+   - [backtrack ()]: pop the most recently pushed [choice] off [stack]
+     and resume it with [step (alt :: rest) at]; if [stack] is empty,
+     every alternative has failed -- return [None].
+
+   Call [trace] (a plain [string -> unit], already defined above) at
+   the points that matter for the "log every position/alternative"
+   requirement: when a literal matches or fails, when an alternative is
+   recorded, and when one is resumed. *)
+let match_from (_pat : pattern) (_subj : string) (_start : int) : int option =
+  failwith "TODO: match_from (explicit-stack backtracking -- see the comment above)"
+
+(* TODO(week 7): implement [find_match], the unanchored outer search
+   (research/snobol/03-pattern-matching.md, "matching is inherently
+   unanchored"): try [match_from pat subj 0] first; if that returns
+   [None] (every alternative recorded at position 0 has been
+   exhausted), try position 1, then 2, and so on up to and including
+   [String.length subj], returning the first [Some _] found, or [None]
+   if no starting position works at all. A [trace] call before each
+   attempt is what lets a run show "both alternatives are tried before
+   the cursor moves on". *)
+let find_match (_pat : pattern) (_subj : string) : int option =
+  failwith "TODO: find_match (try match_from at every starting position 0..length subj)"
 
 let rec eval_expr (e : expr) : value =
   match e with
@@ -284,15 +274,15 @@ and exec_stmt (s : stmt) : outcome =
        assign name v;
        Success
      with Fail_signal -> Failure)
-  | Match (subj_e, pat_e) ->
-    (try
-       let subj = string_of_value (eval_expr subj_e) in
-       let pat = to_pattern (eval_expr pat_e) in
-       trace (Printf.sprintf "matching against %S" subj);
-       (match find_match pat subj with
-        | Some _ -> Success
-        | None -> Failure)
-     with Fail_signal -> Failure)
+  | Match (_subj_e, _pat_e) ->
+    (* TODO(week 7): evaluate the subject ([eval_expr subj_e], then
+       [string_of_value]) and the pattern ([eval_expr pat_e], then
+       [to_pattern]); either can raise [Fail_signal], which should fail
+       the whole statement just like [Assign]/[Expr] above. Then call
+       [find_match] on them: [Some _] is [Success], [None] is
+       [Failure]. Nothing is bound and nothing is replaced this week --
+       the pattern's success or failure is all this statement reports. *)
+    failwith "TODO: exec_stmt's Match case (evaluate subject/pattern, call find_match)"
   | Expr e ->
     (try
        ignore (eval_expr e);

@@ -12,8 +12,62 @@ checkable against real output rather than a rubric's opinion.
 
 ## How I got here
 
+Before any of that, `research/` had to exist for real.
+[`776527f`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/776527f)
+scaffolded the corpus's own conventions and index — frontmatter shape, the
+`[Citekey]` format `research/README.md` resolves, and the rule that anything
+recalled rather than sourced gets prefixed `unverified:`. Filling it in was
+meant to be one large batch, all researched and cited before a single lecture
+page existed to depend on any of it: SNOBOL's history and language reference,
+its pattern-matching semantics, compiler-course pedagogy for how a 12-week
+course should stage itself, regex engine internals, and the case for OCaml
+over the alternatives.
+
+I dispatched that batch on Opus at max reasoning effort, with no limit set on
+how many subagents the dispatching task itself could spawn or what
+model/effort each of those ran at. The week's entire budget was gone in
+roughly 20 minutes. Most of the research had genuinely been done — real
+sources found, real citations assembled — but almost none of it had reached
+`research/` yet; the run died to the shared weekly budget cutoff mid-write,
+and a 429 doesn't hand you back a partial file, it hands you back nothing,
+unless something happened to land first.
+
+When the budget reset, the first job wasn't new research, it was salvage.
+[`f254329`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/f254329)
+recovers exactly one file,
+`research/compilers/01-pipeline-and-pedagogy.md`, straight out of the dead
+run's own subagent transcripts: that particular `Write` call had completed a
+beat before the 429 hit, so its 603 lines of already-cited pedagogy research
+— staging models from Cool, ChocoPy and IU's P523, Ghuloum's incremental-step
+compilers, and where SNOBOL4's own line-oriented grammar breaks the classical
+lexing-heavy staging most compiler courses assume — were sitting intact in
+the transcript, just never committed. Everything else that batch had touched
+had no equivalent surviving artifact and had to be redone properly, smaller
+and slower this time:
+[`f4ac719`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/f4ac719)
+(history, pattern matching, implementation internals, and the regex-engine
+research together), then, once the next reset allowed a further pass,
+[`9932af4`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/9932af4)
+(the language reference) and
+[`a2ad958`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/a2ad958)
+(the OCaml language-choice case).
+
+What stuck from this wasn't the recovery trick itself — it was what the trick
+implied. An agent's tool calls and context are real, durable state the moment
+they happen, independent of whether the task that dispatched it ever returns
+a result; a crashed run isn't a blank to redo from scratch by default, it's a
+transcript worth reading before assuming that. The failure also named a gap
+this repo's own harness didn't close on its own:
+[`c3c4ecf`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/c3c4ecf)'s
+push-after-batch rule assumes there's a finished batch to push once something
+completes — it does nothing for a dispatch that dies before any of its own
+writes land, which is exactly what happened here. Every research batch after
+this one ran smaller and more boundedly on purpose, not because the corpus
+got easier to write, but because one unlimited dispatch had just shown what
+it costs when it doesn't come back.
+
 `research/` already committed this course to a SNOBOL4-in-OCaml compiler
-before any site content existed, so the first work
+before any site content existed, so the first content work
 ([`9ed5765`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/9ed5765))
 was identity: title, code, tags, and replacing the four starter placeholder
 images, which `check:evidence`'s SHA check gates on directly.

@@ -19,9 +19,12 @@ related:
 ## Before the session
 
 Arrive with an OCaml toolchain installed: an opam switch and `dune` for
-building. If you have never set one up before, budget real time for this —
-a broken toolchain on day one costs you every week after it, and it is much
-cheaper to fix before the course needs it for anything.
+building. The [setup page](/setup/) has the exact switch-creation steps and
+the versions this course's own reference implementation was built against
+— follow it and confirm `dune build` runs before you arrive. If you have
+never set one up before, budget real time for this — a broken toolchain on
+day one costs you every week after it, and it is much cheaper to fix before
+the course needs it for anything.
 
 Skim the lecture's naming-dispute aside again before you arrive. You will be
 asked, briefly, which account you'd trust and why.

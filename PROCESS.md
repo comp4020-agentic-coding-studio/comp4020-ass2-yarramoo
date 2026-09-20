@@ -158,3 +158,18 @@ sections and starter-zip links in
 [`4b7c1e7`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass2-yarramoo/commit/4b7c1e7),
 quoting each week's own genuinely-captured transcript verbatim, the same
 discipline the four checkpoint pages already held to.
+
+The last piece was the setup page week-01.md had been silently missing:
+a real `/setup/` page, built from the toolchain versions actually verified
+live in this build environment (`ocaml -version`, `dune --version`, `opam
+--version`) rather than recalled from memory, documenting opam switch
+creation, the per-week download/build/run workflow `interpreter/README.md`
+already describes, and the same hand-rolled-lexer clarification the
+ocamllex disclosure above already fixed on three other pages. It's
+registered in `site-config.ts` the same way `policies/` already is (an
+entry in both `courseApiCollections` and `siteConfig.links`, since the home
+page's "Where to go next" `CardGrid` turned out not to be how this site's
+existing bare pages actually get linked in) and given its own `CardGrid`
+card besides; `week-01.md`'s "Before the session" section now links it in
+place of its old "install an OCaml toolchain" instruction with nothing to
+point at.

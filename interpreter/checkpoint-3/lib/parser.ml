@@ -93,19 +93,24 @@ and parse_unary (st : state) : expr =
   | MINUS_UNARY -> ignore (advance st); Neg (parse_primary st)
   | _ -> parse_primary st
 
-(* Postfix "." -- conditional pattern binding. Binds only to the single
-   pattern element immediately to its left (see the module comment's
-   `ARB . DOTVAR` example), so it sits directly on top of [parse_unary],
-   tighter than `* /` or concatenation: "X Y . V Z" binds V to Y alone,
-   not to "X Y" or to "V Z". *)
+(* TODO(checkpoint 3): implement postfix "." -- conditional pattern
+   binding. It binds only to the single pattern element immediately to
+   its left (see the module comment's `ARB . DOTVAR` example), so it
+   belongs directly on top of [parse_unary], tighter than `* /` or
+   concatenation: "X Y . V Z" should bind V to Y alone, not to "X Y" or
+   to "V Z". When you see [DOT] here, consume it, then expect an
+   [IDENT] naming the variable to bind, and build [Bind (e, name)].
+
+   Deliberately NOT a whole-function [failwith] stub: [parse_bind] sits
+   in the middle of the arithmetic precedence chain ([parse_muldiv]'s
+   base case is [parse_bind], not [parse_unary], now that "." exists),
+   so ordinary arithmetic and concatenation inherited from checkpoint 2
+   -- which never produces a [DOT] token -- must keep working here
+   unmodified; only the actual "." case is unimplemented. *)
 and parse_bind (st : state) : expr =
   let e = parse_unary st in
   match peek st with
-  | DOT ->
-    ignore (advance st);
-    (match advance st with
-     | IDENT name -> Bind (e, name)
-     | _ -> raise (Parse_error "expected a variable name after '.'"))
+  | DOT -> failwith "TODO: implement conditional pattern binding ('.') -- see the comment above"
   | _ -> e
 
 and parse_muldiv (st : state) : expr =
@@ -137,19 +142,27 @@ and parse_concat (st : state) : expr =
   done;
   !lhs
 
-(* Alternation, "|" -- the lowest precedence level of all, sitting below
-   concatenation: concatenation distributes over alternation from the
-   right [Gimpel1973], e.g. `'A' ('B' | 'C')` and `'A' 'B' | 'A' 'C'`
-   denote the same pattern, so alternation must bind more loosely than
-   juxtaposition for `'A' 'B' | 'C'` to parse as `('A' 'B') | 'C'`
-   rather than `'A' ('B' | 'C')`. *)
+(* TODO(checkpoint 3): implement alternation, "|" -- the lowest
+   precedence level of all, sitting below concatenation: concatenation
+   distributes over alternation from the right [Gimpel1973], e.g.
+   `'A' ('B' | 'C')` and `'A' 'B' | 'A' 'C'` denote the same pattern, so
+   alternation must bind more loosely than juxtaposition for
+   `'A' 'B' | 'C'` to parse as `('A' 'B') | 'C'` rather than
+   `'A' ('B' | 'C')`. Loop while the next token is [PIPE], consuming it
+   and building [Alt (lhs, parse_concat st)] each time, same shape as
+   [parse_addsub]'s loop above.
+
+   Deliberately NOT a whole-function [failwith] stub, for the same
+   reason as [parse_bind]: [parse_expr] (below) is now [parse_alt], so
+   *every* expression parsed anywhere in the program -- including
+   plain checkpoint-2 assignment right-hand sides that never contain a
+   "|" -- passes through here. Only the actual "|" case is
+   unimplemented. *)
 and parse_alt (st : state) : expr =
-  let lhs = ref (parse_concat st) in
-  while peek st = PIPE do
-    ignore (advance st);
-    lhs := Alt (!lhs, parse_concat st)
-  done;
-  !lhs
+  let lhs = parse_concat st in
+  match peek st with
+  | PIPE -> failwith "TODO: implement pattern alternation ('|') -- see the comment above"
+  | _ -> lhs
 
 let parse_expr st = parse_alt st
 
@@ -213,6 +226,17 @@ let parse_goto (st : state) : goto option =
    - anything else (including plain EOF or a goto field's leading
      COLON): a bare expression evaluated for effect, e.g. `DEFINE(...)`
      or `GT(N,5)` -- unchanged from checkpoint 2. *)
+(* TODO(checkpoint 3): the [EQUALS] and fall-through (bare [Expr])
+   branches below are checkpoint 2's assignment/bare-expression logic,
+   unchanged, and already work. What's missing is the middle branch:
+   when something that could start an operand follows the subject, a
+   pattern is present. Parse the *whole* pattern expression with
+   [parse_alt] (concatenation, alternation, and "." bindings all
+   included), then check whether an [EQUALS] follows it -- if so, this
+   is a replacement statement (`subject pattern = object`, parse the
+   object with [parse_expr] and build [Match (subject, pattern, Some
+   obj)]); if not, it's a bare pattern-match statement (`subject
+   pattern`, build [Match (subject, pattern, None)]). *)
 let parse_body (st : state) : stmt_body =
   let subject = parse_primary st in
   match peek st with
@@ -224,13 +248,9 @@ let parse_body (st : state) : stmt_body =
       Assign (name, obj)
     | _ -> raise (Parse_error "left-hand side of '=' must be a plain identifier"))
   | t when starts_operand t ->
-    let pattern = parse_alt st in
-    (match peek st with
-     | EQUALS ->
-       ignore (advance st);
-       let obj = parse_expr st in
-       Match (subject, pattern, Some obj)
-     | _ -> Match (subject, pattern, None))
+    failwith
+      "TODO: implement pattern-match statement parsing (subject pattern \
+       [= object]) -- see the comment above [parse_body]"
   | _ -> Expr subject
 
 let parse_stmt (label : string option) (toks : token list) : stmt =

@@ -117,15 +117,17 @@ let to_int = function
   | VPattern _ ->
     failwith "cannot use a pattern value where a number was expected"
 
-(* Coerce an evaluated value into a [pattern]: a pattern value is
-   already one; a plain string or integer becomes a literal match
-   against its printed form -- this is what lets an ordinary variable
-   or string literal be used directly as (part of) a pattern, e.g.
-   `SUBJ 'HELLO'` or `SUBJ SOMEVAR`. *)
-let to_pattern = function
-  | VPattern p -> p
-  | VStr s -> PLit s
-  | VInt n -> PLit (string_of_int n)
+(* TODO(checkpoint 3): implement [to_pattern] -- coerce an evaluated
+   value into a [pattern]: a [VPattern] already is one; a plain string
+   or integer should become a literal match against its printed form
+   ([PLit]) -- this is what lets an ordinary variable or string literal
+   be used directly as (part of) a pattern, e.g. `SUBJ 'HELLO'` or
+   `SUBJ SOMEVAR`. This is used everywhere a pattern value is needed
+   (below in [eval_expr]'s [Concat]/[Alt]/[Bind] cases, and in
+   [exec_stmt]'s [Match] case), so nothing pattern-related will work
+   until it does. *)
+let to_pattern (_v : value) : pattern =
+  failwith "TODO: implement to_pattern (VPattern -> itself; VStr/VInt -> PLit of their printed form)"
 
 let env : (string, value) Hashtbl.t = Hashtbl.create 64
 
@@ -181,14 +183,20 @@ let is_pattern_primitive name =
   | "LEN" | "ANY" | "NOTANY" | "SPAN" | "BREAK" -> true
   | _ -> false
 
-let eval_pattern_primitive (name : string) (args : value list) : value =
-  match name, args with
-  | "LEN", [ n ] -> VPattern (PLen (to_int n))
-  | "ANY", [ s ] -> VPattern (PAny (string_of_value s))
-  | "NOTANY", [ s ] -> VPattern (PNotAny (string_of_value s))
-  | "SPAN", [ s ] -> VPattern (PSpan (string_of_value s))
-  | "BREAK", [ s ] -> VPattern (PBreak (string_of_value s))
-  | _ -> failwith (Printf.sprintf "%s requires exactly one argument" name)
+(* TODO(checkpoint 3): implement [eval_pattern_primitive] -- build the
+   [pattern] value each primitive denotes, from its evaluated argument(s):
+     - "LEN", [n]     -> PLen (to_int n)
+     - "ANY", [s]     -> PAny (string_of_value s)
+     - "NOTANY", [s]  -> PNotAny (string_of_value s)
+     - "SPAN", [s]    -> PSpan (string_of_value s)
+     - "BREAK", [s]   -> PBreak (string_of_value s)
+   each wrapped in [VPattern]. See research/snobol/03-pattern-matching.md,
+   "The primitive patterns", for what each one actually means -- LEN is
+   an exact character count, ANY/NOTANY match exactly one character,
+   SPAN/BREAK are greedy runs (see [match_pat] below for their precise,
+   non-backtracking semantics). *)
+let eval_pattern_primitive (_name : string) (_args : value list) : value =
+  failwith "TODO: implement eval_pattern_primitive (LEN/ANY/NOTANY/SPAN/BREAK -> VPattern ...)"
 
 (* A DEFINE'd function: its formal parameters, its local variables (reset
    to the null string on each call), and the label its body starts at
@@ -234,71 +242,69 @@ let str_contains (set : string) (c : char) : bool = String.contains set c
    Per Griswold's cursor-model contract, every case below either calls
    [k] with a cursor that has moved forward-or-stayed-equal, or returns
    [false] having touched nothing [Griswold1981]. *)
-let rec match_pat (pat : pattern) (subj : string) (pos : int)
-    (binds : binding list) (k : int -> binding list -> bool) : bool =
-  let len = String.length subj in
-  match pat with
-  | PLit s ->
-    let l = String.length s in
-    pos + l <= len && String.sub subj pos l = s && k (pos + l) binds
-  | PLen n -> n >= 0 && pos + n <= len && k (pos + n) binds
-  | PAny set -> pos < len && str_contains set subj.[pos] && k (pos + 1) binds
-  | PNotAny set ->
-    pos < len && (not (str_contains set subj.[pos])) && k (pos + 1) binds
-  | PSpan set ->
-    (* Longest run (>=1 char) from [set]. Per the research file this
-       does *not* retry shorter matches on backtrack "in the usual
-       case" -- so, deliberately, neither does this implementation: one
-       attempt, at the maximal length, or outright failure. *)
-    let j = ref pos in
-    while !j < len && str_contains set subj.[!j] do incr j done;
-    !j > pos && k !j binds
-  | PBreak set ->
-    (* Longest run *not* in [set], stopping just before a character
-       that is in it (or at the end of the subject); may be null. This
-       length is uniquely determined by the subject and [set] -- there
-       is nothing to backtrack over, so (like [PSpan] above) this is a
-       single attempt, not a retry loop. *)
-    let j = ref pos in
-    while !j < len && not (str_contains set subj.[!j]) do incr j done;
-    k !j binds
-  | PArb ->
-    (* Shortest first (the null match), extending by one character on
-       each retry -- Green Book's `ARB = NULL | LEN(1) *ARB`. This is
-       the one primitive here that genuinely retries multiple lengths. *)
-    let rec try_len l = pos + l <= len && (k (pos + l) binds || try_len (l + 1)) in
-    try_len 0
-  | PConcat (p1, p2) ->
-    match_pat p1 subj pos binds (fun pos2 binds2 -> match_pat p2 subj pos2 binds2 k)
-  | PAlt (p1, p2) -> match_pat p1 subj pos binds k || match_pat p2 subj pos binds k
-  | PBind (p, name) ->
-    match_pat p subj pos binds (fun pos2 binds2 ->
-      let matched = String.sub subj pos (pos2 - pos) in
-      k pos2 ((name, matched) :: binds2))
+(* TODO(checkpoint 3): implement [match_pat], the CPS backtracking
+   matcher. Signature (keep it exactly, [find_match] below depends on
+   it): given a [pattern], the [subj]ect string, a starting cursor
+   [pos], the [binds] accumulated so far, and a success continuation
+   [k] that takes the cursor position just after this pattern matched
+   plus the (possibly extended) bindings list and decides whether
+   *everything after this point* ultimately succeeds -- return [true]
+   exactly when some way of matching [pat] here leads [k] to eventually
+   return [true]. Backtracking is nothing more than trying another way
+   when [k] returns [false].
 
-(* Unanchored search: try the whole pattern starting at cursor 0; if
-   every alternative anywhere inside it fails, advance the cursor by
-   one character and start completely over, rather than treating a
-   single failed attempt as "no match anywhere" (research file's
-   `'--1B-A-' (ANY('AB') | '1' ABORT)` example turns on exactly this
-   distinction). Returns the matched span `[start, endp)` and the
-   bindings belonging to the first successful attempt found, in the
-   same left-to-right, first-alternative-first order the backtracking
-   search itself explores. *)
-let find_match (pat : pattern) (subj : string) : (int * int * binding list) option =
-  let len = String.length subj in
-  let rec try_from start =
-    if start > len then None
-    else
-      let result = ref None in
-      let found =
-        match_pat pat subj start [] (fun endp binds ->
-          result := Some (start, endp, binds);
-          true)
-      in
-      if found then !result else try_from (start + 1)
-  in
-  try_from 0
+   Per Griswold's cursor-model contract, every case must either call
+   [k] with a cursor that has moved forward-or-stayed-equal, or return
+   [false] having touched nothing else [Griswold1981]. What each case
+   needs to do (research/snobol/03-pattern-matching.md, "The primitive
+   patterns"):
+     - PLit s      : the next [String.length s] characters of [subj]
+                     must equal [s] exactly.
+     - PLen n      : just advance the cursor by [n], if that many
+                     characters remain.
+     - PAny set    : exactly one character, and it must be in [set].
+     - PNotAny set : exactly one character, and it must NOT be in [set].
+     - PSpan set   : the longest run (>=1 char) drawn from [set] --
+                     ONE attempt at the maximal length; per the research
+                     file this does not retry shorter on backtrack "in
+                     the usual case".
+     - PBreak set  : the longest run NOT in [set] (may be null,
+                     deterministic length) -- also one attempt, nothing
+                     to backtrack over.
+     - PArb        : shortest first (the null match), extending by one
+                     character on each retry -- Green Book's
+                     `ARB = NULL | LEN(1) *ARB`. The one primitive here
+                     that genuinely retries multiple lengths.
+     - PConcat (p1,p2) : match [p1], and in ITS continuation, match [p2]
+                     from wherever [p1] left the cursor, continuing with
+                     the outer [k] -- i.e. nest the continuations.
+     - PAlt (p1,p2)    : try [p1] first; if that can't be made to lead
+                     [k] to [true], try [p2] from the same [pos].
+     - PBind (p,name)  : match [p], and in its continuation, record the
+                     substring it actually matched (from [pos] to the
+                     new cursor) under [name] by consing onto [binds]
+                     before calling [k]. *)
+let match_pat (_pat : pattern) (_subj : string) (_pos : int)
+    (_binds : binding list) (_k : int -> binding list -> bool) : bool =
+  failwith "TODO: implement match_pat (see the comment above for the case-by-case contract)"
+
+(* TODO(checkpoint 3): implement [find_match], the unanchored search
+   driver. Try the whole pattern starting at cursor 0, using a
+   continuation that records the match and returns [true] immediately
+   on any full success; if [match_pat] can't find any way to make that
+   continuation succeed anywhere within it, advance the start cursor by
+   one character and try completely afresh -- do NOT treat a single
+   failed attempt at position 0 as "no match anywhere in the string"
+   (research file's `'--1B-A-' (ANY('AB') | '1' ABORT)` example turns
+   on exactly this distinction: a later alternative can still succeed
+   at the SAME start position after an earlier one fails, and only
+   after every alternative at a position is exhausted should the start
+   position itself advance). Try every start position from 0 up to and
+   including [String.length subj] (a null match is allowed at the very
+   end). Return [Some (start, endp, binds)] for the first successful
+   attempt found, or [None] if no start position works at all. *)
+let find_match (_pat : pattern) (_subj : string) : (int * int * binding list) option =
+  failwith "TODO: implement find_match (see the comment above; calls match_pat)"
 
 let rec eval_expr (e : expr) : value =
   match e with
@@ -429,46 +435,37 @@ and exec_stmt (s : stmt) : outcome =
        ignore (eval_expr e);
        Success
      with Fail_signal -> Failure)
-  | Match (subject_e, pattern_e, object_e) ->
-    (* Green Book Ch.10's fixed execution order for a pattern-matching
-       statement (research/snobol/03-pattern-matching.md, "How a
-       pattern-matching statement actually executes"): subject, then
-       pattern, then the match itself, then (on success) commit
-       conditional bindings, then evaluate the replacement object, then
-       perform the replacement. Steps 1/2/5 can each fail on their own
-       (caught here as [Fail_signal]); step 3 failing is reported by
-       [find_match] returning [None], not by raising. *)
-    (try
-       let subject_v = eval_expr subject_e in
-       let subject_s = string_of_value subject_v in
-       let pat = to_pattern (eval_expr pattern_e) in
-       match find_match pat subject_s with
-       | None -> Failure
-       | Some (start, endp, binds) ->
-         (* Step 4: conditional (".") bindings commit now, unconditionally,
-            because the match itself already succeeded -- independent of
-            whatever the replacement object does next. *)
-         List.iter (fun (name, matched) -> assign name (VStr matched)) (List.rev binds);
-         (match object_e with
-          | None -> Success (* plain pattern-match statement, no replacement *)
-          | Some obj_e ->
-            (try
-               let replacement = string_of_value (eval_expr obj_e) in
-               let new_s =
-                 String.sub subject_s 0 start ^ replacement
-                 ^ String.sub subject_s endp (String.length subject_s - endp)
-               in
-               match subject_e with
-               | Var name ->
-                 assign name (VStr new_s);
-                 Success
-               | _ ->
-                 failwith
-                   "a replacement statement's subject must be a plain \
-                    variable (this subset does not support replacing into, \
-                    e.g., a function-call lvalue)"
-             with Fail_signal -> Failure))
-     with Fail_signal -> Failure)
+  | Match (_subject_e, _pattern_e, _object_e) ->
+    (* TODO(checkpoint 3): implement the pattern-match statement,
+       following the Green Book Ch.10's fixed execution order
+       (research/snobol/03-pattern-matching.md, "How a pattern-matching
+       statement actually executes"):
+         1. evaluate the subject ([eval_expr subject_e]) and turn it
+            into a string ([string_of_value]) -- a [Fail_signal] here
+            fails the whole statement;
+         2. evaluate the pattern ([eval_expr pattern_e]) and coerce it
+            with [to_pattern] -- likewise can fail the statement;
+         3. attempt the match with [find_match]; [None] means the
+            statement fails outright (return [Failure]) with the
+            subject left completely untouched;
+         4. on [Some (start, endp, binds)]: commit every conditional
+            (".") binding into [env] via [assign] NOW, unconditionally
+            -- this must happen before step 5, so a bound variable is
+            already available for use inside the replacement object
+            expression itself (see bind_replace.sno);
+         5. if there is no replacement object ([object_e = None]), the
+            statement is done: [Success];
+         6. otherwise evaluate the replacement object; a [Fail_signal]
+            here fails the statement (but does NOT undo the bindings
+            already committed in step 4 -- that's deliberate, per the
+            Green Book);
+         7. splice the replacement string in place of [start, endp) in
+            the original subject string, and assign the result back --
+            this subset requires the subject to be a plain [Var] (not,
+            e.g., a function-call lvalue) to have somewhere to assign
+            the result to. *)
+    failwith
+      "TODO: implement Match (subject, pattern, replacement) statement execution -- see the comment above"
 
 (* Resolve a goto-field label to a statement index, treating RETURN and
    FRETURN as control exceptions rather than ordinary labels -- see the
